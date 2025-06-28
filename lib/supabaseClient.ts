@@ -49,4 +49,61 @@ export interface Feedback {
   user_id: string
   message: string
   created_at: string
+}
+
+// New types for the bulletin board system
+export interface VisaUpdate {
+  id: string
+  user_id: string
+  country: string
+  center: string
+  visa_type: string
+  milestone: string
+  date_of_event: string
+  note?: string
+  created_at: string
+}
+
+export interface UpdateReaction {
+  id: string
+  update_id: string
+  user_id: string
+  type: 'like' | 'dislike'
+  created_at: string
+}
+
+export interface VisaUpdateWithReactions extends VisaUpdate {
+  reactions: {
+    likes: number
+    dislikes: number
+    user_reaction?: 'like' | 'dislike'
+  }
+}
+
+// Feedback system types
+export interface FeedbackPost {
+  id: string
+  user_id: string
+  country: string
+  milestone: string
+  date_of_event: string
+  note?: string
+  created_at: string
+}
+
+export interface FeedbackReaction {
+  id: string
+  post_id: string
+  user_id: string
+  reaction: 'like' | 'dislike'
+  created_at: string
+}
+
+export interface FeedbackPostWithReactions extends FeedbackPost {
+  reactions: {
+    likes: number
+    dislikes: number
+    user_reaction: 'like' | 'dislike' | null
+  }
 } 
+
