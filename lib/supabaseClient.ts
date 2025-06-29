@@ -105,5 +105,15 @@ export interface FeedbackPostWithReactions extends FeedbackPost {
     dislikes: number
     user_reaction: 'like' | 'dislike' | null
   }
+}
+
+// Profile system types
+export interface UserProfile {
+  user_id: string
+  visa_type?: string
+  service_center?: string
+  country?: string
+  embassy?: string
+  updated_at?: string
 } 
 

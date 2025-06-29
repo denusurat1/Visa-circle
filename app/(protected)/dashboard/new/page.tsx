@@ -2,37 +2,41 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Globe, LogOut, ArrowLeft, Check } from 'lucide-react'
+import { ArrowLeft, Check } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { checkUserAccess } from '@/lib/authUtils'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 
 const COUNTRIES = [
-  'India → US',
-  'India → Canada',
-  'India → UK',
-  'India → Australia',
-  'Pakistan → US',
-  'Pakistan → Canada',
-  'Pakistan → UK',
-  'Nigeria → US',
-  'Nigeria → Canada',
-  'Philippines → US',
-  'Philippines → Canada',
-  'China → US',
-  'China → Canada',
-  'Brazil → US',
-  'Brazil → Canada',
+  'India',
+  'Pakistan',
+  'Nigeria',
+  'Philippines',
+  'China',
+  'Brazil',
+  'Mexico',
+  'Canada',
+  'United Kingdom',
+  'Australia'
 ]
 
 const VISA_TYPES = [
-  'Student Visa',
-  'Work Visa',
-  'Tourist Visa',
-  'Business Visa',
-  'Family Visa',
-  'Permanent Residence',
-  'Citizenship',
+  'CR1 / IR1',
+  'K1',
+  'B1-B2',
+  'F1',
+  'H1B',
+  'L1',
+  'O1',
+  'E1/E2',
+  'TN',
+  'Other'
+]
+
+const SERVICE_CENTERS = [
+  'California',
+  'Texas'
 ]
 
 const MILESTONES = [
@@ -42,22 +46,25 @@ const MILESTONES = [
   'Approved',
   'Rejected',
   'Additional Documents Requested',
+  'Case Transferred',
+  'RFE Received',
+  'RFE Responded',
+  'Case Closed'
 ]
 
 export default function NewUpdatePage() {
   const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [userProfile, setUserProfile] = useState<any>(null)
   
   // Form states
-  const [country, setCountry] = useState('')
-  const [center, setCenter] = useState('')
-  const [visaType, setVisaType] = useState('')
-  const [milestone, setMilestone] = useState('')
-  const [dateOfEvent, setDateOfEvent] = useState('')
+  const [selectedCountry, setSelectedCountry] = useState('')
+  const [selectedVisaType, setSelectedVisaType] = useState('')
+  const [selectedMilestone, setSelectedMilestone] = useState('')
+  const [selectedDate, setSelectedDate] = useState('')
+  const [selectedCenter, setSelectedCenter] = useState('')
   const [note, setNote] = useState('')
-  
+
   const router = useRouter()
 
   useEffect(() => {
@@ -65,99 +72,87 @@ export default function NewUpdatePage() {
       try {
         const currentUser = await checkUserAccess()
         setUser(currentUser)
-        // Set default date to today
-        setDateOfEvent(new Date().toISOString().split('T')[0])
+        
+        // Fetch user profile to pre-fill country and visa type
+        await fetchUserProfile(currentUser.id)
       } catch (error) {
         console.error('Error initializing page:', error)
-      } finally {
-        setLoading(false)
+        router.push('/login')
       }
     }
+    
     initializePage()
-  }, [])
+  }, [router])
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user profile:', error)
+        return
+      }
+
+      if (data) {
+        setUserProfile(data)
+        // Pre-fill country and visa type from profile
+        if (data.country) {
+          setSelectedCountry(data.country)
+        }
+        if (data.visa_type) {
+          setSelectedVisaType(data.visa_type)
+        }
+      }
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!country || !center || !visaType || !milestone || !dateOfEvent) {
+    if (!user || !user.id) return
+
+    if (!selectedCountry || !selectedVisaType || !selectedMilestone || !selectedDate || !selectedCenter) {
       alert('Please fill in all required fields.')
       return
     }
 
-    setSubmitting(true)
+    setLoading(true)
+
     try {
-      const { error } = await supabase
-        .from('visa_updates')
-        .insert({
-          user_id: user.id,
-          country,
-          center,
-          visa_type: visaType,
-          milestone,
-          date_of_event: dateOfEvent,
-          note: note.trim() || null,
-        })
+      const { error } = await supabase.from('visa_updates').insert({
+        user_id: user.id,
+        country: selectedCountry,
+        visa_type: selectedVisaType,
+        center: selectedCenter,
+        milestone: selectedMilestone,
+        date_of_event: selectedDate,
+        note: note.trim() || null,
+      })
 
-      if (error) throw error
+      if (error) {
+        console.error('Error creating update:', error)
+        alert('Error creating update. Please try again.')
+        return
+      }
 
-      setShowSuccess(true)
-      
-      // Reset form
-      setCountry('')
-      setCenter('')
-      setVisaType('')
-      setMilestone('')
-      setDateOfEvent(new Date().toISOString().split('T')[0])
-      setNote('')
-
-      // Redirect after 2 seconds
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 2000)
+      // Redirect to dashboard
+      router.push('/dashboard')
     } catch (error) {
       console.error('Error creating update:', error)
       alert('Error creating update. Please try again.')
     } finally {
-      setSubmitting(false)
+      setLoading(false)
     }
-  }
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <Globe className="h-8 w-8 text-primary-600" />
-              <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-2xl mx-auto px-6 py-8">
         {/* Header */}
@@ -171,132 +166,135 @@ export default function NewUpdatePage() {
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Share Your Visa Milestone</h1>
-
-          {showSuccess && (
-            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center space-x-2">
-                <Check className="h-5 w-5 text-green-600" />
-                <span className="text-green-800 font-medium">Update created successfully!</span>
-              </div>
-              <p className="text-green-700 text-sm mt-1">Redirecting to the board...</p>
-            </div>
-          )}
-
+        {/* Form */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">Share Your Visa Update</h1>
+          
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Country Route <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  required
-                  className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="">Select Country Route</option>
-                  {COUNTRIES.map((countryOption) => (
-                    <option key={countryOption} value={countryOption}>{countryOption}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Visa Center <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={center}
-                  onChange={(e) => setCenter(e.target.value)}
-                  required
-                  placeholder="e.g., Mumbai, Delhi, Chennai"
-                  className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Visa Type <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={visaType}
-                  onChange={(e) => setVisaType(e.target.value)}
-                  required
-                  className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="">Select Visa Type</option>
-                  {VISA_TYPES.map((type) => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Event <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  value={dateOfEvent}
-                  onChange={(e) => setDateOfEvent(e.target.value)}
-                  required
-                  className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Milestone <span className="text-red-500">*</span>
+                Country Route *
               </label>
               <select
-                  value={milestone}
-                  onChange={(e) => setMilestone(e.target.value)}
-                  className="input-field"
-                  required
-                >
-                  <option value="">Select milestone</option>
-                  {MILESTONES.map((milestone) => (
-                    <option key={milestone} value={milestone}>
-                      {milestone}
-                    </option>
-                  ))}
-                </select>
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value)}
+                required
+                disabled={!!userProfile?.country}
+                className={`w-full border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                  userProfile?.country ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''
+                }`}
+              >
+                {!selectedCountry && (
+                  <option value="">Select country route</option>
+                )}
+
+                {COUNTRIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              {userProfile?.country && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Pre-filled from your profile. Update your profile to change this.
+                </p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Additional Notes (Optional)
+                Visa Type *
+              </label>
+              <select
+                value={selectedVisaType}
+                onChange={(e) => setSelectedVisaType(e.target.value)}
+                required
+                disabled={!!userProfile?.visa_type}
+                className={`w-full border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                  userProfile?.visa_type ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''
+                }`}
+              >
+                {!selectedVisaType && (
+                  <option value="">Select visa type</option>
+                )}
+
+                {VISA_TYPES.map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+              </select>
+              {userProfile?.visa_type && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Pre-filled from your profile. Update your profile to change this.
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Service Center *
+              </label>
+              <select
+                value={selectedCenter}
+                onChange={(e) => setSelectedCenter(e.target.value)}
+                required
+                className="w-full border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">Select service center</option>
+                {SERVICE_CENTERS.map((center) => (
+                  <option key={center} value={center}>{center}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Milestone *
+              </label>
+              <select
+                value={selectedMilestone}
+                onChange={(e) => setSelectedMilestone(e.target.value)}
+                required
+                className="w-full border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">Select milestone</option>
+                {MILESTONES.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Date of Event *
+              </label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                required
+                className="w-full border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Additional Notes
               </label>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={4}
-                placeholder="Share any additional details, tips, or experiences..."
-                className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                className="w-full border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="Share any additional details about your visa journey..."
               />
             </div>
 
-            <div className="flex space-x-4 pt-4">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="flex-1 bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? 'Creating...' : 'Share Update'}
-              </button>
-              <Link
-                href="/dashboard"
-                className="flex-1 bg-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-400 transition-colors text-center"
-              >
-                Cancel
-              </Link>
-            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-primary-600 text-white py-3 px-4 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            >
+              <Check className="h-4 w-4" />
+              <span>{loading ? 'Creating Update...' : 'Create Update'}</span>
+            </button>
           </form>
         </div>
       </div>

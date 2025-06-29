@@ -2,39 +2,30 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Globe, LogOut, Plus, Filter, Phone } from 'lucide-react'
+import { Filter } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { checkUserAccess } from '@/lib/authUtils'
 import { VisaUpdateWithReactions } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import VisaUpdateCard from './components/VisaUpdateCard'
+import Navbar from '@/components/Navbar'
 
 const COUNTRIES = [
-  'India → US',
-  'India → Canada',
-  'India → UK',
-  'India → Australia',
-  'Pakistan → US',
-  'Pakistan → Canada',
-  'Pakistan → UK',
-  'Nigeria → US',
-  'Nigeria → Canada',
-  'Philippines → US',
-  'Philippines → Canada',
-  'China → US',
-  'China → Canada',
-  'Brazil → US',
-  'Brazil → Canada',
+  'India',
+  'Pakistan',
+  'Nigeria',
+  'Philippines',
+  'China',
+  'Brazil',
+  'Mexico',
+  'Canada',
+  'United Kingdom',
+  'Australia'
 ]
 
 const VISA_TYPES = [
-  'Student Visa',
-  'Work Visa',
-  'Tourist Visa',
-  'Business Visa',
-  'Family Visa',
-  'Permanent Residence',
-  'Citizenship',
+  'B1-B2',
+  'CR1 / IR1'
 ]
 
 export default function BoardPage() {
@@ -49,12 +40,6 @@ export default function BoardPage() {
   const [selectedMilestone, setSelectedMilestone] = useState('')
   const [showFilters, setShowFilters] = useState(false)
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }  
-
-
   const router = useRouter()
 
   useEffect(() => {
@@ -62,53 +47,87 @@ export default function BoardPage() {
       try {
         const currentUser = await checkUserAccess()
         setUser(currentUser)
-        await fetchUpdates()
+        await fetchUpdates(currentUser)
       } catch (error) {
         console.error('Error initializing page:', error)
       } finally {
         setLoading(false)
       }
     }
+    
     initializePage()
   }, [])
 
-  const fetchUpdates = async () => {
+  const fetchUpdates = async (currentUser: any) => {
     try {
+      // Step 1: Fetch visa updates (keep the working part)
       let query = supabase
         .from('visa_updates')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (selectedCountry) query = query.eq('country', selectedCountry)
-      if (selectedVisaType) query = query.eq('visa_type', selectedVisaType)
-      if (selectedMilestone) query = query.ilike('milestone', `%${selectedMilestone}%`)
+      // Apply filters
+      if (selectedCountry) {
+        query = query.eq('country', selectedCountry)
+      }
+      if (selectedVisaType) {
+        query = query.eq('visa_type', selectedVisaType)
+      }
+      if (selectedMilestone) {
+        query = query.ilike('milestone', `%${selectedMilestone}%`)
+      }
 
-      const { data: updatesData, error } = await query
-      if (error) throw error
+      const { data, error } = await query
 
-      const updatesWithReactions = await Promise.all(
-        (updatesData || []).map(async (update) => {
-          const { data: reactions } = await supabase
+      if (error) {
+        console.error('Error fetching updates:', error)
+        return
+      }
+
+      if (!data) {
+        console.error('No data returned from fetch')
+        return
+      }
+
+      // Step 2: Fetch reactions separately to avoid breaking the main fetch
+      const updateIds = data.map((update: any) => update.id)
+      
+      let reactionsData: any[] = []
+      if (updateIds.length > 0) {
+        try {
+          const { data: reactions, error: reactionsError } = await supabase
             .from('update_reactions')
             .select('*')
-            .eq('update_id', update.id)
+            .in('update_id', updateIds)
 
-          const likes = reactions?.filter(r => r.type === 'like').length || 0
-          const userReaction = reactions?.find(r => r.user_id === user?.id)?.type
-
-          return {
-            ...update,
-            reactions: {
-              likes,
-              user_reaction: userReaction,
-            }
+          if (!reactionsError && reactions) {
+            reactionsData = reactions
           }
-        })
-      )
+        } catch (reactionsErr) {
+          console.log('Reactions table not available yet, continuing without reactions')
+        }
+      }
 
-      setUpdates(updatesWithReactions)
+      // Step 3: Process and combine the data
+      const processedUpdates = data.map((update: any) => {
+        const updateReactions = reactionsData.filter((r: any) => r.update_id === update.id)
+        const likes = updateReactions.filter((r: any) => r.type === 'like').length
+        const dislikes = updateReactions.filter((r: any) => r.type === 'dislike').length
+        const userReaction = updateReactions.find((r: any) => r.user_id === currentUser?.id)?.type || null
+
+        return {
+          ...update,
+          reactions: {
+            likes,
+            dislikes,
+            user_reaction: userReaction
+          }
+        }
+      })
+
+      setUpdates(processedUpdates)
     } catch (error) {
-      console.error('Error fetching updates:', error)
+      console.error('Error in fetchUpdates:', error)
     }
   }
 
@@ -126,7 +145,10 @@ export default function BoardPage() {
         .eq('user_id', user.id)
         .single()
   
-      if (error && error.code !== 'PGRST116') throw error
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking existing reaction:', error)
+        return
+      }
   
       if (existingReaction) {
         // Remove like if already exists
@@ -146,7 +168,7 @@ export default function BoardPage() {
       }
   
       // Refresh updates to reflect new counts
-      await fetchUpdates()
+      await fetchUpdates(user)
     } catch (err) {
       console.error('Error toggling reaction:', err)
     } finally {
@@ -154,8 +176,6 @@ export default function BoardPage() {
     }
   }
   
-  
-
   const clearFilters = () => {
     setSelectedCountry('')
     setSelectedVisaType('')
@@ -163,7 +183,7 @@ export default function BoardPage() {
   }
 
   const applyFilters = () => {
-    fetchUpdates()
+    fetchUpdates(user)
     setShowFilters(false)
   }
 
@@ -180,31 +200,7 @@ export default function BoardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <Globe className="h-8 w-8 text-primary-600" />
-              <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard/new" className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                <Plus className="h-4 w-4" />
-                <span>New Update</span>
-              </Link>
-              <Link href="/feedback" className="flex items-center space-x-2 text-gray-600 hover:text-primary-600">
-                <Phone className="h-4 w-4" />
-                <span>Feedback</span>
-              </Link>
-              <button onClick={handleLogout} className="flex items-center space-x-2 text-gray-600 hover:text-primary-600">
-                <LogOut className="h-5 w-5" />
-                <span>Logout</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar showNewUpdate={true} />
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Header */}
