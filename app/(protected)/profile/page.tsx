@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { checkUserAccess } from '@/lib/authUtils'
 import { UserProfile } from '@/lib/supabaseClient'
 import type { User } from '@supabase/supabase-js'
-import Navbar from '@/components/Navbar'
+import Navbar from '@/app/(protected)/components/Navbar'
 
 const VISA_TYPES = [
   'CR1 / IR1',

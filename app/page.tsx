@@ -8,10 +8,15 @@ export default function HomePage() {
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <Globe className="h-8 w-8 text-primary-600" />
-              <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
+            <Link href="/" className="flex items-center space-x-2">
+                <Globe className="h-8 w-8 text-primary-600" />
+                <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
+            </Link>
+            <div>
+              <Link 
+              href="/pricing" className='btn-secondary'>Pricing</Link>
             </div>
+
             <div className="flex space-x-4">
               <Link href="/login" className="btn-secondary">
                 Login

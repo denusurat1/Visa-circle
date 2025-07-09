@@ -6,7 +6,7 @@ import { ArrowLeft, Check } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { checkUserAccess } from '@/lib/authUtils'
 import Link from 'next/link'
-import Navbar from '@/components/Navbar'
+import Navbar from '@/app/(protected)/components/Navbar'
 
 const COUNTRIES = [
   'India',

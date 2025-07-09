@@ -8,7 +8,7 @@ import { checkUserAccess } from '@/lib/authUtils'
 import { VisaUpdateWithReactions } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import VisaUpdateCard from './components/VisaUpdateCard'
-import Navbar from '@/components/Navbar'
+import Navbar from '@/app/(protected)/components/Navbar'
 
 const COUNTRIES = [
   'India',

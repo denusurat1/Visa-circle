@@ -31,11 +31,11 @@ export default function Navbar({
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Globe className="h-8 w-8 text-primary-600" />
-            <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
-          </div>
-          
+            <Link href="/dashboard" className="flex items-center space-x-2">
+                <Globe className="h-8 w-8 text-primary-600" />
+                <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
+            </Link>
+
           <div className="flex items-center space-x-4">
             {showNewUpdate && (
               <Link 

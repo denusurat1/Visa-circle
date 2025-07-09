@@ -19,33 +19,45 @@ export default function VisaUpdateCard({
 
   return (
     <div className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm">
-      {/* Header: user circle + meta info */}
-      <div className="flex justify-between items-start mb-2">
+      {/* Header: Profile circle + visa type */}
+      <div className="flex justify-between items-start mb-3">
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center">
-          <UserIcon className="h-4 w-4 text-primary-600" />
+            <UserIcon className="h-4 w-4 text-primary-600" />
           </div>
-          <div className="text-sm text-gray-600">
-            <p>
-              From <span className="font-medium">{update.country}</span> •{' '}
-              <span className="inline-block bg-primary-600 text-white text-sm px-3 py-1 rounded-full font-medium">{update.visa_type}</span>
+          <div>
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">User from {update.country}</span>
             </p>
-            <p className="text-xs text-gray-500">Service Center: {update.center}</p>
+            <p className="text-xs text-gray-500">
+              {formatDistanceToNow(new Date(update.created_at), { addSuffix: true })}
+            </p>
           </div>
         </div>
-        <span className="text-xs text-gray-500">
-          {formatDistanceToNow(new Date(update.created_at), { addSuffix: true })}
+        <span className="inline-block bg-primary-600 text-white text-xs px-3 py-1 rounded-full font-medium">
+          {update.visa_type}
         </span>
       </div>
 
-      {/* Milestone badge and event date */}
-      <div className="mb-2">
+      {/* Milestone */}
+      <div className="flex items-center justify-between mb-3">
         <span className="inline-block bg-gray-200 text-black text-sm px-3 py-1 rounded-full font-medium">
           {update.milestone}
         </span>
-        <span className="text-sm text-gray-600 ml-2">
-          on {new Date(update.date_of_event).toLocaleDateString()}
-        </span>
+      </div>
+
+      {/* A → B Path */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-sm text-gray-600 mb-3">
+        <div className="flex-1">
+          <div className="font-medium text-black">🅐 Service Center</div>
+          <div>{update.center || 'N/A'}</div>
+          <div>{update.date_of_event ? new Date(update.date_of_event).toLocaleDateString() : ''}</div>
+        </div>
+        <div className="hidden sm:block w-px bg-gray-300 h-10"></div>
+        <div className="flex-1 mt-2 sm:mt-0">
+          <div className="font-medium text-black">🅑 Country</div>
+          <div>{update.country || 'N/A'}</div>
+        </div>
       </div>
 
       {/* Optional note */}

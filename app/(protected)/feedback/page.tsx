@@ -8,14 +8,14 @@ import { FeedbackPost, FeedbackReaction } from '@/lib/supabaseClient'
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
 import type { User } from '@supabase/supabase-js'
-import Navbar from '@/components/Navbar'
+import Navbar from '@/app/(protected)/components/Navbar'
 
 const FIELDS = [
   'Country Route',
   'Visa Type',
   'Service Center',
   'Milestone',
-  'Other'
+  'Non-field Related'
 ]
 
 /*const MILESTONES = [
@@ -275,6 +275,10 @@ export default function FeedbackPage() {
                   </div>
 
                   <div className="mb-2">
+                  {post.field !== 'Non-field Related' && (
+                    <span className="text-sm text-gray-600">
+                      Field Related change: </span>
+                  )}
                     <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-medium">
                       {post.field}
                     </span>
