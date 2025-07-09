@@ -100,11 +100,11 @@ export default function FeedbackPage() {
       }
 
       // Process posts with reactions
-      const postsWithReactions = postsData.map((post) => {
-        const postReactions = reactionsData.filter(r => r.post_id === post.id)
-        const likes = postReactions.filter(r => r.reaction === 'like').length
-        const dislikes = postReactions.filter(r => r.reaction === 'dislike').length
-        const userReaction = postReactions.find(r => r.user_id === userArg.id)?.reaction || null
+      const postsWithReactions = postsData.map((post: any) => {
+        const postReactions = reactionsData.filter((r: any) => r.post_id === post.id)
+        const likes = postReactions.filter((r: any) => r.reaction === 'like').length
+        const dislikes = postReactions.filter((r: any) => r.reaction === 'dislike').length
+        const userReaction = postReactions.find((r: any) => r.user_id === userArg.id)?.reaction || null
 
         return {
           ...post,
@@ -117,7 +117,7 @@ export default function FeedbackPage() {
       })
 
       // Sort by net score (likes - dislikes)
-      postsWithReactions.sort((a, b) => {
+      postsWithReactions.sort((a: any, b: any) => {
         const scoreA = a.reactions.likes - a.reactions.dislikes
         const scoreB = b.reactions.likes - b.reactions.dislikes
         return scoreB - scoreA
