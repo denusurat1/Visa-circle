@@ -124,6 +124,8 @@ export default function LoginPage() {
       }
 
       console.log("Auth Success")
+      
+      console.log(process.env.NEXT_PUBLIC_SUPABASE_URL)
 
       // Check if user has paid access and redirect accordingly
       const { data: { user } } = await supabase.auth.getUser()
