@@ -53,7 +53,7 @@ export default function Navbar({
                 className="flex items-center space-x-2 text-gray-600 hover:text-primary-600"
               >
                 <Newspaper className="h-4 w-4" />
-                <span>Dashboard</span>
+                <span>Feed</span>
               </Link>
             )}
             

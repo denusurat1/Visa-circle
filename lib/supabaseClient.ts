@@ -84,10 +84,10 @@ export interface VisaUpdateWithReactions extends VisaUpdate {
 export interface FeedbackPost {
   id: string
   user_id: string
-  country: string
+  field: string
   milestone: string
   date_of_event: string
-  note?: string
+  comment?: string
   created_at: string
 }
 
@@ -100,6 +100,7 @@ export interface FeedbackReaction {
 }
 
 export interface FeedbackPostWithReactions extends FeedbackPost {
+  user?: { country: string }
   reactions: {
     likes: number
     dislikes: number

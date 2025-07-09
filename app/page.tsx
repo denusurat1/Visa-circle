@@ -105,7 +105,7 @@ export default function HomePage() {
                   <span className="text-primary-600 font-semibold">A</span>
                 </div>
                 <div className="ml-3">
-                  <p className="font-medium text-gray-900">Alex from Mumbai</p>
+                  <p className="font-medium text-gray-900">Aarav from Mumbai</p>
                   <p className="text-sm text-gray-500">US Visa Approved</p>
                 </div>
               </div>
@@ -113,15 +113,15 @@ export default function HomePage() {
             
             <div className="card">
               <p className="text-gray-600 mb-4">
-                "Finally found a reliable source for Canadian visa timelines. The real-time updates are exactly what I needed."
+                "Finally found a reliable source for US visa timelines. The real-time updates are exactly what I needed."
               </p>
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
                   <span className="text-primary-600 font-semibold">S</span>
                 </div>
                 <div className="ml-3">
-                  <p className="font-medium text-gray-900">Sarah from Delhi</p>
-                  <p className="text-sm text-gray-500">Canada PR Approved</p>
+                  <p className="font-medium text-gray-900">Priya from Delhi</p>
+                  <p className="text-sm text-gray-500">US Visa Approved</p>
                 </div>
               </div>
             </div>
@@ -138,7 +138,7 @@ export default function HomePage() {
               <span className="text-xl font-bold">Visa Circle</span>
             </div>
             <p className="text-gray-400">
-              © 2024 Visa Circle. All rights reserved.
+              © 2025 Visa Circle. All rights reserved.
             </p>
           </div>
         </div>

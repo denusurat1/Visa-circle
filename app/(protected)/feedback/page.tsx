@@ -4,38 +4,38 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { MessageSquare, ThumbsUp, ThumbsDown, UserIcon } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
-import { FeedbackPostWithReactions, FeedbackReaction } from '@/lib/supabaseClient'
+import { FeedbackPost, FeedbackReaction } from '@/lib/supabaseClient'
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
 import type { User } from '@supabase/supabase-js'
 import Navbar from '@/components/Navbar'
 
-const COUNTRIES = [
-  'India → US',
-  'India → Canada',
-  'India → UK',
-  'India → Australia',
-  'Pakistan → US',
-  'Pakistan → Canada',
-  'Pakistan → UK',
-  'Nigeria → US',
-  'Nigeria → Canada',
-  'Philippines → US',
-  'Philippines → Canada',
-  'China → US',
-  'China → Canada',
-  'Brazil → US',
-  'Brazil → Canada',
+const FIELDS = [
+  'Country Route',
+  'Visa Type',
+  'Service Center',
+  'Milestone',
+  'Other'
 ]
 
-const MILESTONES = [
+/*const MILESTONES = [
   'Applied',
   'Biometrics',
   'Interview Scheduled',
   'Approved',
   'Rejected',
   'Additional Documents Requested',
-]
+]*/
+
+// Local interface for posts with reactions and user data
+interface FeedbackPostWithReactions extends FeedbackPost {
+  user?: { country: string }
+  reactions: {
+    likes: number
+    dislikes: number
+    user_reaction: 'like' | 'dislike' | null
+  }
+}
 
 export default function FeedbackPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -46,8 +46,8 @@ export default function FeedbackPage() {
 
   // Modal states
   const [showMilestoneModal, setShowMilestoneModal] = useState(false)
-  const [selectedCountry, setSelectedCountry] = useState('')
-  const [selectedMilestone, setSelectedMilestone] = useState('')
+  const [selectedField, setSelectedField] = useState('')
+  //const [selectedMilestone, setSelectedMilestone] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
   const [comment, setComment] = useState('')
 
@@ -79,13 +79,15 @@ export default function FeedbackPage() {
       // Fetch posts
       const { data: postsData, error: postsError } = await supabase
         .from('feedback_posts')
-        .select('*')
+        .select('*, user:user_profiles(country)')
         .order('created_at', { ascending: false })
 
       if (postsError) {
         console.error('Error fetching posts:', postsError)
         return
       }
+
+      console.log('Fetched posts:', postsData)
 
       // Fetch reactions for all posts
       const { data: reactionsData, error: reactionsError } = await supabase
@@ -121,6 +123,7 @@ export default function FeedbackPage() {
         return scoreB - scoreA
       })
 
+      console.log('Processed posts with reactions:', postsWithReactions)
       setPosts(postsWithReactions)
     } catch (error) {
       console.error('Error in fetchPosts:', error)
@@ -181,7 +184,7 @@ export default function FeedbackPage() {
     e.preventDefault()
     if (!user || !user.id) return
 
-    if (!selectedCountry || !selectedMilestone || !selectedDate) {
+    if (!selectedField /*|| !selectedMilestone || !selectedDate*/) {
       alert('Please fill in all required fields.')
       return
     }
@@ -191,10 +194,10 @@ export default function FeedbackPage() {
     try {
       const { error } = await supabase.from('feedback_posts').insert({
         user_id: user.id,
-        country: selectedCountry,
-        milestone: selectedMilestone,
-        date_of_event: selectedDate,
-        note: comment.trim() || null,
+        field: selectedField,
+        //milestone: selectedMilestone,
+        //date_of_event: selectedDate,
+        comment: comment.trim() || null,
       })
 
       if (error) {
@@ -204,9 +207,9 @@ export default function FeedbackPage() {
       }
 
       // Reset form
-      setSelectedCountry('')
-      setSelectedMilestone('')
-      setSelectedDate('')
+      setSelectedField('')
+      //setSelectedMilestone('')
+      //setSelectedDate('')
       setComment('')
       setShowMilestoneModal(false)
       
@@ -263,7 +266,7 @@ export default function FeedbackPage() {
                       <UserIcon className="h-4 w-4 text-primary-600" />
                       </div>
                       <span className="text-sm text-gray-600">
-                        User from {post.country.split(' → ')[0]}
+                      User from <span className="font-medium">{post.user?.country ?? 'Unknown'}</span>
                       </span>
                     </div>
                     <span className="text-xs text-gray-500">
@@ -272,16 +275,13 @@ export default function FeedbackPage() {
                   </div>
 
                   <div className="mb-2">
-                    <span className="inline-block bg-gray-200 text-black text-sm px-3 py-1 rounded-full font-medium">
-                      {post.milestone}
-                    </span>
-                    <span className="text-gray-600 ml-2">
-                      on {new Date(post.date_of_event).toLocaleDateString()}
+                    <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-medium">
+                      {post.field}
                     </span>
                   </div>
 
-                  {post.note && (
-                    <p className="text-gray-700 text-sm mb-3">{post.note}</p>
+                  {post.comment && (
+                    <p className="text-gray-700 text-sm mb-3">{post.comment}</p>
                   )}
 
                   <div className="flex space-x-2">
@@ -326,22 +326,22 @@ export default function FeedbackPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Country Route *
+                  Choose Field need Updates*
                 </label>
                 <select
-                  value={selectedCountry}
-                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  value={selectedField}
+                  onChange={(e) => setSelectedField(e.target.value)}
                   required
                   className="w-full border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
-                  <option value="">Select country route</option>
-                  {COUNTRIES.map((c) => (
+                  <option value="">Select Fields</option>
+                  {FIELDS.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
               </div>
 
-              <div>
+              {/*<div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Milestone *
                 </label>
@@ -369,7 +369,7 @@ export default function FeedbackPage() {
                   required
                   className="w-full border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
-              </div>
+              </div> */}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
