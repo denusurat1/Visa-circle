@@ -1,19 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import stripe from '@/lib/stripe'
+import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
-
 export async function POST(request: NextRequest) {
+  // Access environment variables only when function is called
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY!
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+
+  // Validate environment variables
+  if (!supabaseUrl || !supabaseServiceKey || !stripeSecretKey || !webhookSecret) {
+    console.error('Missing required environment variables')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 }
+    )
+  }
+
+  const stripe = new Stripe(stripeSecretKey, {
+    apiVersion: '2023-10-16',
+  })
+
+  const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
+
   const body = await request.text()
   const signature = headers().get('stripe-signature')
 
@@ -30,7 +46,7 @@ export async function POST(request: NextRequest) {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     )
   } catch (error) {
     console.error('Webhook signature verification failed:', error)

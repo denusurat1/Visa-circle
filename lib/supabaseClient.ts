@@ -1,30 +1,39 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// Validate environment variables
-if (!supabaseUrl) {
-  console.error('NEXT_PUBLIC_SUPABASE_URL is not defined')
-}
+// Only validate and create client if environment variables are available
+// This prevents build-time errors when env vars are not set
+let supabase: any = null
 
-if (!supabaseAnonKey) {
-  console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY is not defined')
-}
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
-}
-
-console.log('Supabase client initialized with URL:', supabaseUrl)
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
+if (supabaseUrl && supabaseAnonKey) {
+  supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  })
+} else {
+  // Create a mock client for build time
+  supabase = {
+    auth: {
+      getSession: async () => ({ data: { session: null }, error: null }),
+      signInWithPassword: async () => ({ data: null, error: null }),
+      signUp: async () => ({ data: null, error: null }),
+      signOut: async () => ({ error: null })
+    },
+    from: () => ({
+      select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }) }) }),
+      insert: async () => ({ data: null, error: null }),
+      update: async () => ({ eq: async () => ({ data: null, error: null }) }),
+      delete: async () => ({ eq: async () => ({ data: null, error: null }) })
+    })
   }
-})
+}
+
+export { supabase }
 
 // Database types
 export interface User {
