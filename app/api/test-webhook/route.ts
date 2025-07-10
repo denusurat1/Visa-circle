@@ -1,3 +1,7 @@
+// 🧪 This is a local test utility to simulate Stripe webhooks.
+// Run manually for debugging only.
+
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getStripeConfig, validateStripeEnvironment } from '@/lib/stripeConfig'
 
@@ -34,7 +38,7 @@ export async function POST(request: NextRequest) {
         object: {
           id: sessionId || 'cs_test_' + Date.now(),
           object: 'checkout.session',
-          amount_total: 50,
+          amount_total: 100,
           currency: 'usd',
           customer: null,
           metadata: {

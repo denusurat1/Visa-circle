@@ -1,3 +1,7 @@
+// ✅ This is the production Stripe webhook handler.
+// Called by Stripe on real `checkout.session.completed` events.
+
+
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'

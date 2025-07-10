@@ -145,10 +145,10 @@ export default function CheckoutPage() {
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2">
               <Globe className="h-8 w-8 text-primary-600" />
               <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
-            </div>
+            </Link>
             <Link href="/" className="text-gray-600 hover:text-gray-900">
               Back to home
             </Link>
@@ -163,7 +163,7 @@ export default function CheckoutPage() {
             Complete Your Registration
           </h1>
           <p className="text-lg text-gray-600">
-            Your one-time $0.50 payment helps keep this community verified and ad-free.
+            Your $1/month subscription keeps the community verified and ad-free.
           </p>
         </div>
 
@@ -221,8 +221,8 @@ export default function CheckoutPage() {
               <div className="flex items-start space-x-3">
                 <CheckCircle className="h-6 w-6 text-green-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-medium text-gray-900">Lifetime Access</h3>
-                  <p className="text-gray-600">One-time payment, no recurring fees</p>
+                  <h3 className="font-medium text-gray-900">Premium Access</h3>
+                  <p className="text-gray-600">Feed with the latest information</p>
                 </div>
               </div>
             </div>
@@ -230,7 +230,9 @@ export default function CheckoutPage() {
             <div className="bg-gray-50 rounded-xl p-6">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-medium text-gray-900">Total Amount:</span>
-                <span className="text-2xl font-bold text-primary-600">$0.50</span>
+                <span className="text-2xl font-bold text-primary-600">$1.00<span className="text-sm text-gray-600 mt-2">
+                /month
+              </span></span>
               </div>
               <p className="text-sm text-gray-600 mt-2">
                 Secure payment processed by Stripe

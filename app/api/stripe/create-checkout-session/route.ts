@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Visa Circle Access',
-              description: 'One-time payment for lifetime access to Visa Circle dashboard',
+              name: 'Visa Circle Premium Access',
+              description: 'Subscription access to Visa Circle premium features',
             },
-            unit_amount: 50, // $0.50 in cents (test amount)
+            unit_amount: 50, // $1.00 in cents (test amount)
           },
           quantity: 1,
         },

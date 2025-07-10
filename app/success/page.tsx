@@ -291,7 +291,7 @@ export default function SuccessPage() {
             </div>
           )}
 
-          {/* Debug Info */}
+          {/* Debug Info 
           {debugInfo && (
             <div className="mb-6 p-4 bg-gray-50 rounded-lg text-left">
               <h3 className="text-sm font-medium text-gray-900 mb-2">Debug Info:</h3>
@@ -302,7 +302,7 @@ export default function SuccessPage() {
                 <div>Updated: {debugInfo.updatedAt}</div>
               </div>
             </div>
-          )}
+          )}*/}
 
           <div className="space-y-4">
             <Link
