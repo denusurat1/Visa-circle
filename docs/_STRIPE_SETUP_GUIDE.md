@@ -15,8 +15,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 # Stripe TEST Configuration (for local development)
-STRIPE_SECRET_KEY=sk_test_XXXXXXXXXXXXXXXXXXXXXXXX
-STRIPE_WEBHOOK_SECRET=whsec_XXXXXXXXXXXXXXXXXXXXXXXX
+STRIPE_SECRET_KEY=sk_test_your_test_secret_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_test_webhook_secret_here
 
 # Local Base URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
@@ -33,8 +33,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 # Stripe LIVE Configuration (for production)
-STRIPE_SECRET_KEY=sk_live_XXXXXXXXXXXXXXXXXXXXXXXX
-STRIPE_WEBHOOK_SECRET=whsec_XXXXXXXXXXXXXXXXXXXXXXXX
+STRIPE_SECRET_KEY=sk_live_your_live_secret_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_live_webhook_secret_here
 ```
 
 ## 🔧 Stripe Dashboard Setup
