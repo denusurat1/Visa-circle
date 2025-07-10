@@ -12,6 +12,10 @@ export async function POST(request: NextRequest) {
     console.log('🔄 Stripe API: Environment check - Base URL exists:', !!baseUrl)
     console.log('🔄 Stripe API: Base URL value:', baseUrl)
 
+    console.log('STRIPE_SECRET_KEY:', stripeSecretKey)
+    console.log('NEXT_PUBLIC_BASE_URL:', baseUrl)
+
+
     // Validate environment variables
     if (!stripeSecretKey || !baseUrl) {
       console.error('❌ Stripe API: Missing required environment variables')
