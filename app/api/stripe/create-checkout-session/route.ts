@@ -1,41 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { getStripeConfig, validateStripeEnvironment, getCheckoutUrls } from '@/lib/stripeConfig'
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🔄 Stripe API: Starting checkout session creation...')
     
-    const stripeSecretKey = process.env.STRIPE_SECRET_KEY!
-    // Use VERCEL_URL for server-side, fallback to NEXT_PUBLIC_BASE_URL
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : process.env.NEXT_PUBLIC_BASE_URL!
+    // Validate Stripe environment
+    validateStripeEnvironment()
+    
+    // Get Stripe configuration
+    const config = getStripeConfig()
+    
+    console.log('🔄 Stripe API: Using environment:', config.environment)
+    console.log('🔄 Stripe API: Base URL:', config.baseUrl)
+    console.log('🔄 Stripe API: Test mode:', config.isTestMode)
 
-    console.log('🔄 Stripe API: Environment check - Stripe key exists:', !!stripeSecretKey)
-    console.log('🔄 Stripe API: Environment check - Base URL exists:', !!baseUrl)
-    console.log('🔄 Stripe API: Base URL value:', baseUrl)
-    console.log('🔄 Stripe API: VERCEL_URL:', process.env.VERCEL_URL)
-    console.log('🔄 Stripe API: NEXT_PUBLIC_BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL)
-
-    // Validate environment variables
-    if (!stripeSecretKey || !baseUrl) {
-      console.error('❌ Stripe API: Missing required environment variables')
-      console.error('❌ Stripe API: STRIPE_SECRET_KEY exists:', !!stripeSecretKey)
-      console.error('❌ Stripe API: Base URL exists:', !!baseUrl)
-      console.error('❌ Stripe API: Available env vars:', Object.keys(process.env).filter(key => 
-        key.includes('URL') || key.includes('STRIPE') || key.includes('BASE')
-      ))
-      return NextResponse.json(
-        { error: 'Server configuration error - missing environment variables' },
-        { status: 500 }
-      )
-    }
-
-    const stripe = new Stripe(stripeSecretKey, {
+    const stripe = new Stripe(config.secretKey, {
       apiVersion: '2023-10-16',
     })
 
-    console.log('🔄 Stripe API: Stripe client initialized successfully')
+    console.log('✅ Stripe API: Stripe client initialized successfully')
 
     const body = await request.json()
     const { userId } = body
@@ -53,6 +38,9 @@ export async function POST(request: NextRequest) {
 
     console.log('🔄 Stripe API: Creating Stripe checkout session...')
 
+    // Get checkout URLs
+    const { successUrl, cancelUrl } = getCheckoutUrls()
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -63,24 +51,32 @@ export async function POST(request: NextRequest) {
               name: 'Visa Circle Access',
               description: 'One-time payment for lifetime access to Visa Circle dashboard',
             },
-            unit_amount: 100, // $1.00 in cents
+            unit_amount: 50, // $0.50 in cents (test amount)
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
-      success_url: `${baseUrl}/success?success=true`,
-      cancel_url: `${baseUrl}/checkout?canceled=true`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         userId: userId,
+        environment: config.environment, // Track which environment was used
       },
     })
 
     console.log('✅ Stripe API: Checkout session created successfully')
     console.log('✅ Stripe API: Session ID:', session.id)
+    console.log('✅ Stripe API: Environment:', config.environment)
+    console.log('✅ Stripe API: Success URL:', successUrl)
+    console.log('✅ Stripe API: Cancel URL:', cancelUrl)
     console.log('✅ Stripe API: Checkout URL:', session.url)
 
-    return NextResponse.json({ url: session.url })
+    return NextResponse.json({ 
+      url: session.url,
+      environment: config.environment,
+      sessionId: session.id
+    })
   } catch (error: any) {
     console.error('❌ Stripe API: Error creating checkout session:', error)
     console.error('❌ Stripe API: Error message:', error.message)

@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Globe, Shield, CheckCircle } from 'lucide-react'
+import { Globe, Shield, CheckCircle, AlertTriangle } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [error, setError] = useState<string>('')
+  const [environment, setEnvironment] = useState<string>('')
   const router = useRouter()
 
   useEffect(() => {
@@ -106,6 +107,12 @@ export default function CheckoutPage() {
       const data = await response.json()
       console.log('✅ CheckoutPage: Checkout session created successfully:', data)
       
+      // Store environment info for debugging
+      if (data.environment) {
+        setEnvironment(data.environment)
+        console.log('✅ CheckoutPage: Stripe environment:', data.environment)
+      }
+      
       if (data.url) {
         console.log('🔄 CheckoutPage: Redirecting to Stripe:', data.url)
         window.location.href = data.url
@@ -156,9 +163,27 @@ export default function CheckoutPage() {
             Complete Your Registration
           </h1>
           <p className="text-lg text-gray-600">
-            Your one-time $1 payment helps keep this community verified and ad-free.
+            Your one-time $0.50 payment helps keep this community verified and ad-free.
           </p>
         </div>
+
+        {/* Environment Indicator */}
+        {environment && (
+          <div className="mb-6">
+            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+              environment === 'test' 
+                ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' 
+                : 'bg-green-100 text-green-800 border border-green-200'
+            }`}>
+              {environment === 'test' ? (
+                <AlertTriangle className="h-4 w-4 mr-1" />
+              ) : (
+                <CheckCircle className="h-4 w-4 mr-1" />
+              )}
+              {environment === 'test' ? 'Test Mode' : 'Live Mode'}
+            </div>
+          </div>
+        )}
 
         <div className="card">
           <div className="space-y-6">
@@ -205,7 +230,7 @@ export default function CheckoutPage() {
             <div className="bg-gray-50 rounded-xl p-6">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-medium text-gray-900">Total Amount:</span>
-                <span className="text-2xl font-bold text-primary-600">$1.00</span>
+                <span className="text-2xl font-bold text-primary-600">$0.50</span>
               </div>
               <p className="text-sm text-gray-600 mt-2">
                 Secure payment processed by Stripe
