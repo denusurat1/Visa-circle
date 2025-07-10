@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test-webhook": "node scripts/test-webhook.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^2.2.0",

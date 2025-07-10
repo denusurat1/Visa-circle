@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Globe, CheckCircle, ArrowRight } from 'lucide-react'
+import { Globe, CheckCircle, ArrowRight, RefreshCw, AlertTriangle } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function SuccessPage() {
   const [countdown, setCountdown] = useState(30)
   const [paymentStatus, setPaymentStatus] = useState<string>('checking')
+  const [manualCheckLoading, setManualCheckLoading] = useState(false)
+  const [debugInfo, setDebugInfo] = useState<any>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const success = searchParams.get('success')
@@ -38,7 +40,7 @@ export default function SuccessPage() {
           
           const { data: userData, error: userError } = await supabase
             .from('users')
-            .select('has_paid')
+            .select('has_paid, created_at, updated_at')
             .eq('id', user.id)
             .single()
 
@@ -48,10 +50,22 @@ export default function SuccessPage() {
             console.log('✅ Success Page: Payment confirmed!')
             hasPaid = true
             setPaymentStatus('confirmed')
+            setDebugInfo({
+              userId: user.id,
+              hasPaid: userData.has_paid,
+              createdAt: userData.created_at,
+              updatedAt: userData.updated_at
+            })
             break
           } else {
             console.log('⚠️ Success Page: Payment not yet confirmed, retrying...')
             setPaymentStatus('waiting')
+            setDebugInfo({
+              userId: user.id,
+              hasPaid: userData?.has_paid || false,
+              createdAt: userData?.created_at,
+              updatedAt: userData?.updated_at
+            })
             // Wait 3 seconds before retrying
             await new Promise(resolve => setTimeout(resolve, 3000))
           }
@@ -74,6 +88,94 @@ export default function SuccessPage() {
       checkPaymentStatus()
     }
   }, [success])
+
+  const handleManualCheck = async () => {
+    setManualCheckLoading(true)
+    try {
+      console.log('🔄 Success Page: Manual payment status check...')
+      
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !user) {
+        console.error('❌ Success Page: User not authenticated for manual check')
+        return
+      }
+
+      // Call the payment status API
+      const response = await fetch('/api/check-payment-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ Success Page: Manual check result:', data)
+        setDebugInfo(data)
+        
+        if (data.hasPaid) {
+          setPaymentStatus('confirmed')
+        } else {
+          setPaymentStatus('failed')
+        }
+      } else {
+        console.error('❌ Success Page: Manual check failed:', response.status)
+      }
+    } catch (error) {
+      console.error('❌ Success Page: Manual check error:', error)
+    } finally {
+      setManualCheckLoading(false)
+    }
+  }
+
+  const handleTestWebhook = async () => {
+    setManualCheckLoading(true)
+    try {
+      console.log('🔄 Success Page: Testing webhook...')
+      
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !user) {
+        console.error('❌ Success Page: User not authenticated for webhook test')
+        return
+      }
+
+      // Call the test webhook API
+      const response = await fetch('/api/test-webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ Success Page: Webhook test result:', data)
+        alert(`Webhook test completed. Check console for details. Status: ${data.status}`)
+        
+        // Re-check payment status after webhook test
+        setTimeout(() => {
+          handleManualCheck()
+        }, 2000)
+      } else {
+        console.error('❌ Success Page: Webhook test failed:', response.status)
+        const errorData = await response.json()
+        alert(`Webhook test failed: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error('❌ Success Page: Webhook test error:', error)
+      alert('Webhook test error: ' + error)
+    } finally {
+      setManualCheckLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (success === 'true' && paymentStatus === 'confirmed') {
@@ -146,15 +248,61 @@ export default function SuccessPage() {
             )}
             {paymentStatus === 'failed' && (
               <div className="flex items-center justify-center space-x-2 text-red-600">
-                <span className="text-sm">Payment verification failed. Please contact support.</span>
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-sm">Payment verification failed.</span>
               </div>
             )}
             {paymentStatus === 'error' && (
               <div className="flex items-center justify-center space-x-2 text-red-600">
-                <span className="text-sm">Error verifying payment. Please try again.</span>
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-sm">Error verifying payment.</span>
               </div>
             )}
           </div>
+
+          {/* Manual Check Button */}
+          {paymentStatus === 'failed' && (
+            <div className="mb-6 space-y-2">
+              <button
+                onClick={handleManualCheck}
+                disabled={manualCheckLoading}
+                className="w-full btn-secondary flex items-center justify-center space-x-2 py-2"
+              >
+                {manualCheckLoading ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                <span>Check Payment Status Manually</span>
+              </button>
+              
+              <button
+                onClick={handleTestWebhook}
+                disabled={manualCheckLoading}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2"
+              >
+                {manualCheckLoading ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                <span>Test Webhook (Debug)</span>
+              </button>
+            </div>
+          )}
+
+          {/* Debug Info */}
+          {debugInfo && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg text-left">
+              <h3 className="text-sm font-medium text-gray-900 mb-2">Debug Info:</h3>
+              <div className="text-xs text-gray-600 space-y-1">
+                <div>User ID: {debugInfo.userId}</div>
+                <div>Has Paid: {debugInfo.hasPaid ? 'Yes' : 'No'}</div>
+                <div>Created: {debugInfo.createdAt}</div>
+                <div>Updated: {debugInfo.updatedAt}</div>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-4">
             <Link

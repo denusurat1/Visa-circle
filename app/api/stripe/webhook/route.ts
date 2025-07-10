@@ -5,7 +5,8 @@ import { createClient } from '@supabase/supabase-js'
 import { getStripeConfig, validateStripeEnvironment } from '@/lib/stripeConfig'
 
 export async function POST(request: NextRequest) {
-  console.log('🔄 Webhook: Received webhook request')
+  const startTime = Date.now()
+  console.log('🔄 Webhook: Received webhook request at', new Date().toISOString())
   
   try {
     // Validate Stripe environment
@@ -14,8 +15,10 @@ export async function POST(request: NextRequest) {
     // Get Stripe configuration
     const config = getStripeConfig()
     
-    console.log('🔄 Webhook: Using environment:', config.environment)
+    console.log('🔄 Webhook: Environment:', config.environment)
     console.log('🔄 Webhook: Test mode:', config.isTestMode)
+    console.log('🔄 Webhook: Secret key prefix:', config.secretKey.substring(0, 7) + '...')
+    console.log('🔄 Webhook: Webhook secret prefix:', config.webhookSecret.substring(0, 7) + '...')
 
     // Access Supabase environment variables
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -49,6 +52,7 @@ export async function POST(request: NextRequest) {
 
     console.log('🔄 Webhook: Request body length:', body.length)
     console.log('🔄 Webhook: Signature present:', !!signature)
+    console.log('🔄 Webhook: Signature value:', signature ? signature.substring(0, 20) + '...' : 'null')
 
     if (!signature) {
       console.error('❌ Webhook: No signature provided')
@@ -61,6 +65,7 @@ export async function POST(request: NextRequest) {
     let event
 
     try {
+      console.log('🔄 Webhook: Attempting to verify signature...')
       event = stripe.webhooks.constructEvent(
         body,
         signature,
@@ -68,9 +73,13 @@ export async function POST(request: NextRequest) {
       )
       console.log('✅ Webhook: Event verified successfully')
       console.log('✅ Webhook: Event type:', event.type)
+      console.log('✅ Webhook: Event ID:', event.id)
       console.log('✅ Webhook: Environment:', config.environment)
-    } catch (error) {
-      console.error('❌ Webhook: Signature verification failed:', error)
+    } catch (error: any) {
+      console.error('❌ Webhook: Signature verification failed')
+      console.error('❌ Webhook: Error message:', error.message)
+      console.error('❌ Webhook: Error type:', error.type)
+      console.error('❌ Webhook: Expected webhook secret prefix:', config.webhookSecret.substring(0, 7) + '...')
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 400 }
@@ -86,6 +95,9 @@ export async function POST(request: NextRequest) {
       console.log('🔄 Webhook: Session metadata:', session.metadata)
       console.log('🔄 Webhook: User ID from metadata:', userId)
       console.log('🔄 Webhook: Environment from metadata:', environment)
+      console.log('🔄 Webhook: Session ID:', session.id)
+      console.log('🔄 Webhook: Payment status:', session.payment_status)
+      console.log('🔄 Webhook: Session status:', session.status)
 
       if (!userId) {
         console.error('❌ Webhook: No userId found in session metadata')
@@ -106,28 +118,38 @@ export async function POST(request: NextRequest) {
         // First, check if user exists
         const { data: existingUser, error: checkError } = await supabaseAdmin
           .from('users')
-          .select('id, has_paid')
+          .select('id, has_paid, created_at, updated_at')
           .eq('id', userId)
           .single()
 
         if (checkError) {
           console.error('❌ Webhook: Error checking existing user:', checkError)
+          console.error('❌ Webhook: Error code:', checkError.code)
+          console.error('❌ Webhook: Error message:', checkError.message)
           return NextResponse.json(
             { error: 'User not found' },
             { status: 404 }
           )
         }
 
-        console.log('✅ Webhook: User found, current has_paid status:', existingUser.has_paid)
+        console.log('✅ Webhook: User found')
+        console.log('✅ Webhook: Current has_paid status:', existingUser.has_paid)
+        console.log('✅ Webhook: User created at:', existingUser.created_at)
+        console.log('✅ Webhook: User updated at:', existingUser.updated_at)
 
         // Update user's has_paid status
-        const { error } = await supabaseAdmin
+        const { error: updateError } = await supabaseAdmin
           .from('users')
-          .update({ has_paid: true })
+          .update({ 
+            has_paid: true,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', userId)
 
-        if (error) {
-          console.error('❌ Webhook: Error updating user payment status:', error)
+        if (updateError) {
+          console.error('❌ Webhook: Error updating user payment status:', updateError)
+          console.error('❌ Webhook: Update error code:', updateError.code)
+          console.error('❌ Webhook: Update error message:', updateError.message)
           return NextResponse.json(
             { error: 'Failed to update user status' },
             { status: 500 }
@@ -140,7 +162,7 @@ export async function POST(request: NextRequest) {
         // Verify the update
         const { data: updatedUser, error: verifyError } = await supabaseAdmin
           .from('users')
-          .select('has_paid')
+          .select('has_paid, updated_at')
           .eq('id', userId)
           .single()
 
@@ -148,10 +170,15 @@ export async function POST(request: NextRequest) {
           console.error('❌ Webhook: Error verifying update:', verifyError)
         } else {
           console.log('✅ Webhook: Verified update - has_paid is now:', updatedUser.has_paid)
+          console.log('✅ Webhook: Updated timestamp:', updatedUser.updated_at)
         }
 
-      } catch (error) {
+        const processingTime = Date.now() - startTime
+        console.log('✅ Webhook: Processing completed in', processingTime, 'ms')
+
+      } catch (error: any) {
         console.error('❌ Webhook: Error processing webhook:', error)
+        console.error('❌ Webhook: Error stack:', error.stack)
         return NextResponse.json(
           { error: 'Failed to process webhook' },
           { status: 500 }
@@ -165,6 +192,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true })
   } catch (error: any) {
     console.error('❌ Webhook: Unexpected error:', error)
+    console.error('❌ Webhook: Error stack:', error.stack)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
