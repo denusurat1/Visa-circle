@@ -34,4 +34,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts 
+next-env.d.ts
+
+# documentation with sensitive examples
+docs/_STRIPE_SETUP_GUIDE.md 
