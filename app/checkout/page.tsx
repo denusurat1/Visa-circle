@@ -9,43 +9,71 @@ import { supabase } from '@/lib/supabaseClient'
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [error, setError] = useState<string>('')
   const router = useRouter()
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
-      
-      // Check if user has already paid
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('has_paid')
-        .eq('id', user.id)
-        .single()
+      try {
+        console.log('🔄 CheckoutPage: Starting user authentication check...')
+        console.log('🔄 CheckoutPage: Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+        console.log('🔄 CheckoutPage: Supabase client initialized:', !!supabase)
+        
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        
+        if (authError) {
+          console.error('❌ CheckoutPage: Auth error:', authError)
+          setError('Authentication failed')
+          router.push('/login')
+          return
+        }
+        
+        if (!user) {
+          console.log('⚠️ CheckoutPage: No user found, redirecting to login')
+          router.push('/login')
+          return
+        }
+        
+        console.log('✅ CheckoutPage: User authenticated:', user.id)
+        
+        // Check if user has already paid
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('has_paid')
+          .eq('id', user.id)
+          .single()
 
-      if (userError) {
-        console.error('Error checking user access:', userError)
-        router.push('/login')
-        return
-      }
+        if (userError) {
+          console.error('❌ CheckoutPage: Error checking user access:', userError)
+          setError('Failed to check payment status')
+          router.push('/login')
+          return
+        }
 
-      if (userData?.has_paid) {
-        router.push('/dashboard')
-        return
-      }
+        if (userData?.has_paid) {
+          console.log('✅ CheckoutPage: User already paid, redirecting to dashboard')
+          router.push('/dashboard')
+          return
+        }
 
-      setUser(user)
+        console.log('✅ CheckoutPage: User needs payment, setting user state')
+        setUser(user)
+      } catch (error) {
+        console.error('❌ CheckoutPage: Unexpected error in getUser:', error)
+        setError('Unexpected error occurred')
+      }
     }
     getUser()
   }, [router])
 
   const handleCheckout = async () => {
     setLoading(true)
+    setError('')
+    
     try {
-      console.log('Creating checkout session for user:', user?.id)
+      console.log('🔄 CheckoutPage: Starting checkout process...')
+      console.log('🔄 CheckoutPage: User ID:', user?.id)
+      console.log('🔄 CheckoutPage: Base URL:', process.env.NEXT_PUBLIC_BASE_URL)
       
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
@@ -57,26 +85,28 @@ export default function CheckoutPage() {
         }),
       })
 
-      console.log('Checkout session response status:', response.status)
+      console.log('🔄 CheckoutPage: Response status:', response.status)
+      console.log('🔄 CheckoutPage: Response headers:', Object.fromEntries(response.headers.entries()))
       
       if (!response.ok) {
         const errorData = await response.json()
-        console.error('Checkout session error:', errorData)
-        throw new Error(errorData.error || 'Failed to create checkout session')
+        console.error('❌ CheckoutPage: API error response:', errorData)
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to create checkout session`)
       }
 
       const data = await response.json()
-      console.log('Checkout session data:', data)
+      console.log('✅ CheckoutPage: Checkout session created successfully:', data)
       
       if (data.url) {
-        console.log('Redirecting to Stripe checkout:', data.url)
+        console.log('🔄 CheckoutPage: Redirecting to Stripe:', data.url)
         window.location.href = data.url
       } else {
-        throw new Error('No checkout URL received')
+        console.error('❌ CheckoutPage: No checkout URL in response')
+        throw new Error('No checkout URL received from server')
       }
-    } catch (error) {
-      console.error('Error creating checkout session:', error)
-      alert('Failed to create checkout session. Please try again.')
+    } catch (error: any) {
+      console.error('❌ CheckoutPage: Checkout error:', error)
+      setError(error.message || 'Failed to create checkout session. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -172,6 +202,13 @@ export default function CheckoutPage() {
                 Secure payment processed by Stripe
               </p>
             </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <div className="font-medium">Error</div>
+                <div className="text-sm mt-1">{error}</div>
+              </div>
+            )}
 
             <button
               onClick={handleCheckout}

@@ -3,14 +3,22 @@ import Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔄 Stripe API: Starting checkout session creation...')
+    
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY!
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!
 
+    console.log('🔄 Stripe API: Environment check - Stripe key exists:', !!stripeSecretKey)
+    console.log('🔄 Stripe API: Environment check - Base URL exists:', !!baseUrl)
+    console.log('🔄 Stripe API: Base URL value:', baseUrl)
+
     // Validate environment variables
     if (!stripeSecretKey || !baseUrl) {
-      console.error('Missing required environment variables')
+      console.error('❌ Stripe API: Missing required environment variables')
+      console.error('❌ Stripe API: STRIPE_SECRET_KEY exists:', !!stripeSecretKey)
+      console.error('❌ Stripe API: NEXT_PUBLIC_BASE_URL exists:', !!baseUrl)
       return NextResponse.json(
-        { error: 'Server configuration error' },
+        { error: 'Server configuration error - missing environment variables' },
         { status: 500 }
       )
     }
@@ -19,14 +27,23 @@ export async function POST(request: NextRequest) {
       apiVersion: '2023-10-16',
     })
 
-    const { userId } = await request.json()
+    console.log('🔄 Stripe API: Stripe client initialized successfully')
+
+    const body = await request.json()
+    const { userId } = body
+
+    console.log('🔄 Stripe API: Request body:', body)
+    console.log('🔄 Stripe API: User ID:', userId)
 
     if (!userId) {
+      console.error('❌ Stripe API: User ID is required but not provided')
       return NextResponse.json(
         { error: 'User ID is required' },
         { status: 400 }
       )
     }
+
+    console.log('🔄 Stripe API: Creating Stripe checkout session...')
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -51,11 +68,18 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log('✅ Stripe API: Checkout session created successfully')
+    console.log('✅ Stripe API: Session ID:', session.id)
+    console.log('✅ Stripe API: Checkout URL:', session.url)
+
     return NextResponse.json({ url: session.url })
-  } catch (error) {
-    console.error('Error creating checkout session:', error)
+  } catch (error: any) {
+    console.error('❌ Stripe API: Error creating checkout session:', error)
+    console.error('❌ Stripe API: Error message:', error.message)
+    console.error('❌ Stripe API: Error stack:', error.stack)
+    
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { error: `Failed to create checkout session: ${error.message}` },
       { status: 500 }
     )
   }

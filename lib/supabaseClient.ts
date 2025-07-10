@@ -3,32 +3,58 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+console.log('🔄 Supabase Client: Initializing...')
+console.log('🔄 Supabase Client: URL exists:', !!supabaseUrl)
+console.log('🔄 Supabase Client: Anon key exists:', !!supabaseAnonKey)
+
 // Only validate and create client if environment variables are available
 // This prevents build-time errors when env vars are not set
 let supabase: any = null
 
 if (supabaseUrl && supabaseAnonKey) {
-  supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true
-    }
-  })
+  try {
+    supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    })
+    console.log('✅ Supabase Client: Successfully initialized')
+  } catch (error) {
+    console.error('❌ Supabase Client: Failed to initialize:', error)
+    // Fall back to mock client
+    supabase = createMockClient()
+  }
 } else {
-  // Create a mock client for build time
-  supabase = {
+  console.warn('⚠️ Supabase Client: Environment variables missing, using mock client')
+  // Create a mock client for build time or when env vars are missing
+  supabase = createMockClient()
+}
+
+function createMockClient() {
+  return {
     auth: {
       getSession: async () => ({ data: { session: null }, error: null }),
+      getUser: async () => ({ data: { user: null }, error: null }),
       signInWithPassword: async () => ({ data: null, error: null }),
       signUp: async () => ({ data: null, error: null }),
-      signOut: async () => ({ error: null })
+      signOut: async () => ({ error: null }),
+      exchangeCodeForSession: async () => ({ error: null })
     },
     from: () => ({
-      select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }) }) }),
+      select: () => ({ 
+        eq: () => ({ 
+          single: async () => ({ data: null, error: null }) 
+        }) 
+      }),
       insert: async () => ({ data: null, error: null }),
-      update: async () => ({ eq: async () => ({ data: null, error: null }) }),
-      delete: async () => ({ eq: async () => ({ data: null, error: null }) })
+      update: async () => ({ 
+        eq: async () => ({ data: null, error: null }) 
+      }),
+      delete: async () => ({ 
+        eq: async () => ({ data: null, error: null }) 
+      })
     })
   }
 }
