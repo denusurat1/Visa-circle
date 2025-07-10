@@ -45,6 +45,8 @@ export default function CheckoutPage() {
   const handleCheckout = async () => {
     setLoading(true)
     try {
+      console.log('Creating checkout session for user:', user?.id)
+      
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -55,12 +57,26 @@ export default function CheckoutPage() {
         }),
       })
 
-      const { url } = await response.json()
-      if (url) {
-        window.location.href = url
+      console.log('Checkout session response status:', response.status)
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Checkout session error:', errorData)
+        throw new Error(errorData.error || 'Failed to create checkout session')
+      }
+
+      const data = await response.json()
+      console.log('Checkout session data:', data)
+      
+      if (data.url) {
+        console.log('Redirecting to Stripe checkout:', data.url)
+        window.location.href = data.url
+      } else {
+        throw new Error('No checkout URL received')
       }
     } catch (error) {
       console.error('Error creating checkout session:', error)
+      alert('Failed to create checkout session. Please try again.')
     } finally {
       setLoading(false)
     }

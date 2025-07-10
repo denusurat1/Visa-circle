@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import stripe from '@/lib/stripe'
+import Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
   try {
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY!
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!
+
+    // Validate environment variables
+    if (!stripeSecretKey || !baseUrl) {
+      console.error('Missing required environment variables')
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      )
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: '2023-10-16',
+    })
+
     const { userId } = await request.json()
 
     if (!userId) {
@@ -28,8 +44,8 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout?canceled=true`,
+      success_url: `${baseUrl}/success?success=true`,
+      cancel_url: `${baseUrl}/checkout?canceled=true`,
       metadata: {
         userId: userId,
       },
