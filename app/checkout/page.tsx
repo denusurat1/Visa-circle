@@ -73,7 +73,8 @@ export default function CheckoutPage() {
     try {
       console.log('🔄 CheckoutPage: Starting checkout process...')
       console.log('🔄 CheckoutPage: User ID:', user?.id)
-      console.log('🔄 CheckoutPage: Base URL:', process.env.NEXT_PUBLIC_BASE_URL)
+      console.log('🔄 CheckoutPage: Current URL:', window.location.href)
+      console.log('🔄 CheckoutPage: Base URL from env:', process.env.NEXT_PUBLIC_BASE_URL)
       
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
@@ -91,7 +92,15 @@ export default function CheckoutPage() {
       if (!response.ok) {
         const errorData = await response.json()
         console.error('❌ CheckoutPage: API error response:', errorData)
-        throw new Error(errorData.error || `HTTP ${response.status}: Failed to create checkout session`)
+        
+        // Provide more specific error messages
+        if (errorData.error?.includes('environment variables')) {
+          throw new Error('Server configuration issue. Please contact support.')
+        } else if (errorData.error?.includes('User ID')) {
+          throw new Error('Authentication error. Please log in again.')
+        } else {
+          throw new Error(errorData.error || `HTTP ${response.status}: Failed to create checkout session`)
+        }
       }
 
       const data = await response.json()

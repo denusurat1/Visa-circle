@@ -6,21 +6,25 @@ export async function POST(request: NextRequest) {
     console.log('🔄 Stripe API: Starting checkout session creation...')
     
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY!
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!
+    // Use VERCEL_URL for server-side, fallback to NEXT_PUBLIC_BASE_URL
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : process.env.NEXT_PUBLIC_BASE_URL!
 
     console.log('🔄 Stripe API: Environment check - Stripe key exists:', !!stripeSecretKey)
     console.log('🔄 Stripe API: Environment check - Base URL exists:', !!baseUrl)
     console.log('🔄 Stripe API: Base URL value:', baseUrl)
-
-    console.log('STRIPE_SECRET_KEY:', stripeSecretKey)
-    console.log('NEXT_PUBLIC_BASE_URL:', baseUrl)
-
+    console.log('🔄 Stripe API: VERCEL_URL:', process.env.VERCEL_URL)
+    console.log('🔄 Stripe API: NEXT_PUBLIC_BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL)
 
     // Validate environment variables
     if (!stripeSecretKey || !baseUrl) {
       console.error('❌ Stripe API: Missing required environment variables')
       console.error('❌ Stripe API: STRIPE_SECRET_KEY exists:', !!stripeSecretKey)
-      console.error('❌ Stripe API: NEXT_PUBLIC_BASE_URL exists:', !!baseUrl)
+      console.error('❌ Stripe API: Base URL exists:', !!baseUrl)
+      console.error('❌ Stripe API: Available env vars:', Object.keys(process.env).filter(key => 
+        key.includes('URL') || key.includes('STRIPE') || key.includes('BASE')
+      ))
       return NextResponse.json(
         { error: 'Server configuration error - missing environment variables' },
         { status: 500 }
