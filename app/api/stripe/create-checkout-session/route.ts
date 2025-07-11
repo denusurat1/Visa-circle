@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { getStripeConfig, validateStripeEnvironment, getCheckoutUrls } from '@/lib/stripeConfig'
+import { getStripeConfig, validateStripeEnvironment } from '@/lib/stripeConfig'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +39,10 @@ export async function POST(request: NextRequest) {
     console.log('🔄 Stripe API: Creating Stripe checkout session...')
 
     // Get checkout URLs
-    const { successUrl, cancelUrl } = getCheckoutUrls()
+    const successUrl = `${config.baseUrl}/success?success=true&userId=${encodeURIComponent(userId)}`
+    const cancelUrl = `${config.baseUrl}/checkout?canceled=true`
+    console.log('🔄 Stripe API: Success URL:', successUrl)
+    console.log('🔄 Stripe API: Cancel URL:', cancelUrl)
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],

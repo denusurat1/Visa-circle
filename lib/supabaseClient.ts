@@ -14,12 +14,12 @@ let supabase: any = null
 if (supabaseUrl && supabaseAnonKey) {
   try {
     supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
-      }
-    })
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+})
     console.log('✅ Supabase Client: Successfully initialized')
   } catch (error) {
     console.error('❌ Supabase Client: Failed to initialize:', error)

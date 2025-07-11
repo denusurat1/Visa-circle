@@ -100,7 +100,7 @@ export default function BoardPage() {
 
         if (hasPaid) {
           console.log('✅ Dashboard: Payment confirmed, fetching updates...')
-          await fetchUpdates(currentUser)
+        await fetchUpdates(currentUser)
         }
       } catch (error) {
         console.error('❌ Dashboard: Error initializing page:', error)
