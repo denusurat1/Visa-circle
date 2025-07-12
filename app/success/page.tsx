@@ -11,47 +11,48 @@ export default function SuccessPage() {
   const [paymentStatus, setPaymentStatus] = useState<string>('checking')
   const [manualCheckLoading, setManualCheckLoading] = useState(false)
   const [debugInfo, setDebugInfo] = useState<any>(null)
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const success = searchParams.get('success')
+  const success: string | null = searchParams?.get('success') ?? null
+  const userId: string | null = searchParams?.get('userId') ?? null  
+
+
+  const router = useRouter()
+  
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
       try {
         console.log('🔄 Success Page: Checking payment status...')
-        
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        
-        if (authError || !user) {
-          console.error('❌ Success Page: User not authenticated')
+    
+        if (!userId) {
+          console.error('❌ Success Page: No userId found in URL')
           setPaymentStatus('error')
           return
         }
-
-        console.log('✅ Success Page: User authenticated:', user.id)
-
-        // Check payment status with retry logic
+    
+        console.log('✅ Success Page: Found userId in URL:', userId)
+    
         let hasPaid = false
         let retryCount = 0
         const maxRetries = 10
-
+    
         while (!hasPaid && retryCount < maxRetries) {
           console.log(`🔄 Success Page: Checking payment status (attempt ${retryCount + 1}/${maxRetries})...`)
-          
+    
           const { data: userData, error: userError } = await supabase
             .from('users')
             .select('has_paid, created_at, updated_at')
-            .eq('id', user.id)
+            .eq('id', userId)
             .single()
-
+    
           if (userError) {
-            console.error('❌ Success Page: Error checking user access:', userError)
+            console.error('❌ Success Page: Error checking user:', userError)
           } else if (userData?.has_paid) {
             console.log('✅ Success Page: Payment confirmed!')
             hasPaid = true
             setPaymentStatus('confirmed')
             setDebugInfo({
-              userId: user.id,
+              userId,
               hasPaid: userData.has_paid,
               createdAt: userData.created_at,
               updatedAt: userData.updated_at
@@ -61,28 +62,28 @@ export default function SuccessPage() {
             console.log('⚠️ Success Page: Payment not yet confirmed, retrying...')
             setPaymentStatus('waiting')
             setDebugInfo({
-              userId: user.id,
+              userId,
               hasPaid: userData?.has_paid || false,
               createdAt: userData?.created_at,
               updatedAt: userData?.updated_at
             })
-            // Wait 3 seconds before retrying
             await new Promise(resolve => setTimeout(resolve, 3000))
           }
-          
+    
           retryCount++
         }
-
+    
         if (!hasPaid) {
           console.log('❌ Success Page: Payment not confirmed after max retries')
           setPaymentStatus('failed')
         }
-
+    
       } catch (error) {
         console.error('❌ Success Page: Error checking payment status:', error)
         setPaymentStatus('error')
       }
     }
+    
 
     if (success === 'true') {
       checkPaymentStatus()
@@ -93,24 +94,19 @@ export default function SuccessPage() {
     setManualCheckLoading(true)
     try {
       console.log('🔄 Success Page: Manual payment status check...')
+          if (!userId) {
+            console.error('❌ Manual Check: No userId in URL')
+            return
+          }
       
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+          const response = await fetch('/api/test-webhook', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId }),
+          })
       
-      if (authError || !user) {
-        console.error('❌ Success Page: User not authenticated for manual check')
-        return
-      }
-
-      // Call the payment status API
-      const response = await fetch('/api/check-payment-status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.id,
-        }),
-      })
 
       if (response.ok) {
         const data = await response.json()
@@ -137,21 +133,18 @@ export default function SuccessPage() {
     try {
       console.log('🔄 Success Page: Testing webhook...')
       
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
-      
-      if (authError || !user) {
-        console.error('❌ Success Page: User not authenticated for webhook test')
+      if (!userId) {
+        console.error('❌ Manual Check: No userId in URL')
         return
       }
 
-      // Call the test webhook API
       const response = await fetch('/api/test-webhook', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user.id,
+          userId,
         }),
       })
 
