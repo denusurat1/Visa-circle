@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Globe, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 
+
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -15,6 +15,21 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [notification, setNotification] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isLogin, setIsLogin] = useState(true)
+
+  useEffect(() => {
+    const modeParam = searchParams?.get('mode') || ''
+    if (modeParam === 'signup') {
+      setIsLogin(false)
+    } else {
+      setIsLogin(true)
+    }
+  }, [searchParams])
+
+
+  
+
 
   // Test Supabase connection on component mount
   useEffect(() => {

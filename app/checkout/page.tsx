@@ -12,6 +12,44 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string>('')
   const [environment, setEnvironment] = useState<string>('')
   const router = useRouter()
+  const [accessCode, setAccessCode] = useState('')
+  const [codeError, setCodeError] = useState('')
+  const [codeLoading, setCodeLoading] = useState(false)
+
+  const handleAccessCode = async () => {
+    setCodeError('')
+    setCodeLoading(true)
+  
+    try {
+      if (!accessCode.trim()) {
+        setCodeError('Please enter an access code')
+        return
+      }
+  
+      if (accessCode !== 'FIRST100') {
+        setCodeError('Invalid access code')
+        return
+      }
+  
+      const { error } = await supabase
+        .from('users')
+        .update({ has_paid: true })
+        .eq('id', user.id)
+  
+      if (error) {
+        console.error('❌ Failed to update user has_paid:', error)
+        setCodeError('Failed to activate premium access. Please try again.')
+        return
+      }
+  
+      router.push('/dashboard')
+    } catch (err) {
+      console.error(err)
+      setCodeError('Unexpected error. Please try again.')
+    } finally {
+      setCodeLoading(false)
+    }
+  }
 
   useEffect(() => {
     const getUser = async () => {
@@ -260,6 +298,26 @@ export default function CheckoutPage() {
                 'Proceed to Secure Checkout'
               )}
             </button>
+            <div className="mt-6 text-center space-y-2">
+              <p className="text-sm text-gray-500">Have an access code?</p>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  placeholder="Enter access code"
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value)}
+                  className="border rounded px-3 py-2 text-sm text-gray-900 w-full"
+                />
+                <button
+                  onClick={handleAccessCode}
+                  disabled={codeLoading}
+                  className="btn-secondary"
+                >
+                  {codeLoading ? 'Verifying…' : 'Apply'}
+                </button>
+              </div>
+              {codeError && <p className="text-sm text-red-600 mt-1">{codeError}</p>}
+            </div>
 
             <div className="text-center">
               <p className="text-sm text-gray-500">
