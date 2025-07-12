@@ -282,7 +282,7 @@ export default function CheckoutPage() {
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                What you'll get:
+                What you&apos;ll get:
               </h2>
             </div>
 

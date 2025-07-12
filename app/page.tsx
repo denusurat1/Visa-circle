@@ -103,7 +103,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="card">
               <p className="text-gray-600 mb-4">
-                "Visa Circle helped me understand the timeline for my US visa application. The community updates were incredibly helpful!"
+              &quot;Visa Circle helped me understand the timeline for my US visa application. The community updates were incredibly helpful!&quot;
               </p>
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
