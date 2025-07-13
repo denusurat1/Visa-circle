@@ -37,7 +37,7 @@ export default function HomePage() {
               Powered by the community. Get insights from real people going through the same visa journey as you.
             </p>
             <div className="flex justify-center space-x-4">
-              <Link href="/login?mode=signup" className="btn-primary text-lg px-8 py-4">
+              <Link href="/pricing" className="btn-primary text-lg px-8 py-4">
                 Get Started
               </Link>
               <Link href="/pricing" className="btn-secondary text-lg px-8 py-4">

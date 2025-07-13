@@ -89,7 +89,7 @@ export default function Navbar({
                       onClick={() => setShowDropdown(false)}
                     >
                       <Phone className="h-4 w-4" />
-                      <span>Feedback</span>
+                      <span>Contact Us</span>
                     </Link>
                   )}
                   

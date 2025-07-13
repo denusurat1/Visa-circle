@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { User as UserIcon, Save, Check, Edit } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
-import { checkUserAccess } from '@/lib/authUtils'
+import { checkLoggedIn } from '@/lib/authUtils'
 import { UserProfile } from '@/lib/supabaseClient'
 import type { User } from '@supabase/supabase-js'
 import Navbar from '@/app/(protected)/components/Navbar'
@@ -81,7 +81,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const initialize = async () => {
       try {
-        const currentUser = await checkUserAccess()
+        const currentUser = await checkLoggedIn()
         setUser(currentUser)
         
         // Fetch user data
@@ -307,14 +307,14 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Paid User</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Access Type</label>
                 <div className="flex items-center space-x-2">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                     userData?.has_paid 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {userData?.has_paid ? 'Yes' : 'No'}
+                    {userData?.has_paid ? 'Premium' : 'Standard'}
                   </span>
                 </div>
               </div>

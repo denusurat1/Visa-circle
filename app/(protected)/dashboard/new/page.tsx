@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Check } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
-import { checkUserAccess } from '@/lib/authUtils'
+import { checkPaidUser } from '@/lib/authUtils'
 import Link from 'next/link'
 import Navbar from '@/app/(protected)/components/Navbar'
 
@@ -70,7 +70,7 @@ export default function NewUpdatePage() {
   useEffect(() => {
     const initializePage = async () => {
       try {
-        const currentUser = await checkUserAccess()
+        const currentUser = await checkPaidUser()
         setUser(currentUser)
         
         // Fetch user profile to pre-fill country and visa type

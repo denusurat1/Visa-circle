@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Globe, Shield, CheckCircle, AlertTriangle, X, ArrowRight } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
+import Navbar from '@/app/(protected)/components/Navbar'
+import { useSearchParams } from 'next/navigation'
 
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
@@ -16,7 +18,11 @@ export default function CheckoutPage() {
   const [codeError, setCodeError] = useState('')
   const [codeLoading, setCodeLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const params = useSearchParams()
+  const reason = params?.get('reason')
+  const [showVerifyDetails, setShowVerifyDetails] = useState(false);
 
+  
   const handleAccessCode = async () => {
     setCodeError('')
     setCodeLoading(true)
@@ -51,6 +57,7 @@ export default function CheckoutPage() {
       setCodeLoading(false)
     }
   }
+
 
   useEffect(() => {
     const getUser = async () => {
@@ -181,19 +188,12 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <Globe className="h-8 w-8 text-primary-600" />
-              <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
-            </Link>
-            <Link href="/" className="text-gray-600 hover:text-gray-900">
-              Back to home
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar 
+        showDashboard={false} 
+        showNewUpdate={false} 
+        showProfile={true} 
+        showFeedback={true} 
+      />
 
       <div className="max-w-2xl mx-auto px-6 py-12">
         <div className="text-center mb-8">
@@ -204,6 +204,13 @@ export default function CheckoutPage() {
           <p className="text-lg text-gray-600">
             Your $1/month subscription keeps the community verified and ad-free.
           </p>
+
+          {/* Show reason notice if present */}
+          {reason === 'premium' && (
+              <div className="bg-yellow-100 text-yellow-800 border border-yellow-200 rounded p-3 mt-6 text-center">
+                This feature is for <strong>Premium users</strong>. Please complete checkout below.
+              </div>
+            )}
         </div>
 
         {/* Environment Indicator */}
@@ -356,32 +363,79 @@ export default function CheckoutPage() {
 
         {/* Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white rounded-xl shadow-lg p-6 max-w-lg w-full relative">
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+            <div className="bg-white rounded-xl shadow-lg p-8 max-w-xl w-full relative">
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" />
               </button>
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Claim Your Free Premium Access</h3>
-              <ol className="list-decimal list-inside space-y-2 text-gray-700 mb-6">
-                <li className="line-through">Sign up as a User</li>
-                <li className="line-through">Confirm your Email Address</li>
-                <li>Forward email from USCIS or CEAC.gov — Validate your current status</li>
-                <li>Receive Confirmation and Free Access Code</li>
-                <li>Use Access code for Premium Access</li>
-              </ol>
-              <Link
-                href="/login?mode=signup"
-                className="inline-flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Sign Up
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Link>
-            </div>
-          </div>
-        )}
+
+              <h3 className="text-2xl font-semibold text-gray-900 mb-8 text-center">
+                Claim Your Free Premium Access
+              </h3>
+
+              <div className="flex justify-between items-center mb-8 px-4">
+                {/* Step 1 */}
+                <div className="flex flex-col items-center w-1/3">
+                  <Globe className="h-8 w-8 text-green-600 mb-2" />
+                  <span className="line-through text-sm font-medium text-gray-800">
+                    Sign Up
+                  </span>
+                </div>
+
+                <ArrowRight className="h-4 w-4 text-gray-300" />
+
+                {/* Step 2: Verify with hover and click */}
+                <div 
+                  onClick={() => setShowVerifyDetails(!showVerifyDetails)}
+                  className="flex justify-center w-1/3 cursor-pointer"
+                >
+                  <div className="flex flex-col items-center px-3 py-2 rounded-md hover:bg-gray-100 hover:text-primary-600 transition-colors">
+                  <Shield className="h-8 w-8 text-green-600 mb-2" />
+                  <span className="text-sm font-medium text-center">
+                    Verify
+                  </span>
+                  </div>
+                </div>
+
+                <ArrowRight className="h-4 w-4 text-gray-300" />
+
+                {/* Step 3 */}
+                <div className="flex flex-col items-center w-1/3">
+                  <CheckCircle className="h-8 w-8 text-green-600 mb-2" />
+                  <span className="text-sm font-medium text-gray-800 text-center">
+                    Lifetime Access
+                  </span>
+                </div>
+              </div>
+
+              {showVerifyDetails && (
+                <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700">
+                  <p>
+                    <strong>Step 1:</strong>{' '}Update your{' '}
+                    <Link
+                    href="/profile" className="text-rpimary-600 hover:text-primary-500 underline">Profile</Link></p>
+                  <p><strong>Step 2:</strong> Forward USCIS Email (Current Application) to Support</p>
+                </div>
+                        )}
+
+                        <p className="text-center text-sm text-gray-500">
+                          If you have any questions, email us at{' '}
+                          <a
+                            href="mailto:support@visacircle.com"
+                            className="text-primary-600 hover:text-primary-500"
+                          >
+                            support@visacircle.com
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+
+
       </div>
     </div>
   )
