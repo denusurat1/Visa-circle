@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Filter } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
@@ -43,78 +43,7 @@ export default function BoardPage() {
 
   const router = useRouter()
 
-  useEffect(() => {
-    const initializePage = async () => {
-      try {
-        console.log('🔄 Dashboard: Starting initialization...')
-        
-        // First, get the current user
-        const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
-        
-        if (authError || !currentUser) {
-          console.error('❌ Dashboard: Authentication error:', authError)
-          router.push('/login')
-          return
-        }
-
-        console.log('✅ Dashboard: User authenticated:', currentUser.id)
-        setUser(currentUser)
-
-        // Check payment status with retry logic
-        let hasPaid = false
-        let retryCount = 0
-        const maxRetries = 5
-
-        while (!hasPaid && retryCount < maxRetries) {
-          console.log(`🔄 Dashboard: Checking payment status (attempt ${retryCount + 1}/${maxRetries})...`)
-          
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('has_paid')
-            .eq('id', currentUser.id)
-            .single()
-
-          if (userError) {
-            console.error('❌ Dashboard: Error checking user access:', userError)
-            if (retryCount === maxRetries - 1) {
-              router.push('/login')
-              return
-            }
-          } else if (userData?.has_paid) {
-            console.log('✅ Dashboard: User has paid access')
-            hasPaid = true
-            break
-          } else {
-            console.log('⚠️ Dashboard: User has not paid yet, retrying...')
-            if (retryCount === maxRetries - 1) {
-              console.log('❌ Dashboard: Max retries reached, redirecting to checkout')
-              router.push('/checkout')
-              return
-            }
-            // Wait 2 seconds before retrying
-            await new Promise(resolve => setTimeout(resolve, 2000))
-          }
-          
-          retryCount++
-        }
-
-        if (hasPaid) {
-          console.log('✅ Dashboard: Payment confirmed, fetching updates...')
-        await fetchUpdates(currentUser)
-        }
-      } catch (error) {
-        console.error('❌ Dashboard: Error initializing page:', error)
-        router.push('/login')
-      } finally {
-        setLoading(false)
-        setAccessCheckLoading(false)
-      }
-    }
-    
-    initializePage()
-  }, [])
-
-  const fetchUpdates = async (currentUser: any) => {
+  const fetchUpdates = useCallback(async (currentUser: any) => {
     try {
       // Step 1: Fetch visa updates (keep the working part)
       let query = supabase
@@ -185,7 +114,80 @@ export default function BoardPage() {
     } catch (error) {
       console.error('Error in fetchUpdates:', error)
     }
-  }
+  }, [selectedCountry, selectedVisaType, selectedMilestone] )
+
+  useEffect(() => {
+    
+    const initializePage = async () => {
+      try {
+        console.log('🔄 Dashboard: Starting initialization...')
+        
+        // First, get the current user
+        const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
+        
+        if (authError || !currentUser) {
+          console.error('❌ Dashboard: Authentication error:', authError)
+          router.push('/login')
+          return
+        }
+
+        console.log('✅ Dashboard: User authenticated:', currentUser.id)
+        setUser(currentUser)
+
+        // Check payment status with retry logic
+        let hasPaid = false
+        let retryCount = 0
+        const maxRetries = 5
+
+        while (!hasPaid && retryCount < maxRetries) {
+          console.log(`🔄 Dashboard: Checking payment status (attempt ${retryCount + 1}/${maxRetries})...`)
+          
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('has_paid')
+            .eq('id', currentUser.id)
+            .single()
+
+          if (userError) {
+            console.error('❌ Dashboard: Error checking user access:', userError)
+            if (retryCount === maxRetries - 1) {
+              router.push('/login')
+              return
+            }
+          } else if (userData?.has_paid) {
+            console.log('✅ Dashboard: User has paid access')
+            hasPaid = true
+            break
+          } else {
+            console.log('⚠️ Dashboard: User has not paid yet, retrying...')
+            if (retryCount === maxRetries - 1) {
+              console.log('❌ Dashboard: Max retries reached, redirecting to checkout')
+              router.push('/checkout')
+              return
+            }
+            // Wait 2 seconds before retrying
+            await new Promise(resolve => setTimeout(resolve, 2000))
+          }
+          
+          retryCount++
+        }
+
+        if (hasPaid) {
+          console.log('✅ Dashboard: Payment confirmed, fetching updates...')
+        await fetchUpdates(currentUser)
+        }
+      } catch (error) {
+        console.error('❌ Dashboard: Error initializing page:', error)
+        router.push('/login')
+      } finally {
+        setLoading(false)
+        setAccessCheckLoading(false)
+      }
+    }
+    
+    initializePage()
+  }, [router, fetchUpdates])
+
 
   const handleReaction = async (updateId: string) => {
     if (!user) return
