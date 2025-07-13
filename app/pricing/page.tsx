@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CheckCircle, ArrowRight, Globe, X } from 'lucide-react'
+import { CheckCircle, ArrowRight, Globe, X, Users, Clock, Shield } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 
 const features_free = [
@@ -39,7 +39,7 @@ export default function PricingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -59,7 +59,7 @@ export default function PricingPage() {
           </div>
         </div>
       </nav>
-
+      
       {/* Pricing Panels */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 space-y-6">
         {/* Current Users Panel */}
@@ -75,7 +75,7 @@ export default function PricingPage() {
           {/* Left panel: Free offer */}
           <div className="bg-white border rounded-xl shadow-sm p-6">
             <h2 className="text-xl font-bold text-green-700 mb-2">
-              Verified Users - Free Premium Access
+              Lifetime Premium Access
             </h2>
             <p className="text-gray-700 mb-4">Free Access for verified 100 users</p>
             <ul className="space-y-2 mb-6">
@@ -120,6 +120,46 @@ export default function PricingPage() {
         </div>
       </div>
 
+      {/* Features Section */}
+      <section className="bg-gray-50 py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Why choose Visa Circle?
+            </h2>
+            <p className="text-lg text-gray-600">
+              Join thousands of applicants tracking their visa journey
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="card text-center">
+              <Users className="h-12 w-12 text-primary-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Community Driven</h3>
+              <p className="text-gray-600">
+                Real updates from people going through the same process as you
+              </p>
+            </div>
+            
+            <div className="card text-center">
+              <Clock className="h-12 w-12 text-primary-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Real-time Updates</h3>
+              <p className="text-gray-600">
+                Get instant notifications about visa processing times and milestones
+              </p>
+            </div>
+            
+            <div className="card text-center">
+              <Shield className="h-12 w-12 text-primary-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Verified Community</h3>
+              <p className="text-gray-600">
+                One-time payment ensures a trusted, ad-free environment
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -148,6 +188,23 @@ export default function PricingPage() {
           </div>
         </div>
       )}
+
+            {/* Footer */}
+            <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center space-x-2 mb-4 md:mb-0">
+              <Globe className="h-6 w-6 text-primary-400" />
+              <span className="text-xl font-bold">Visa Circle</span>
+            </div>
+            <p className="text-gray-400">
+              © 2025 Visa Circle. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+
+      
     </div>
   )
 }

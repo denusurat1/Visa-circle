@@ -12,16 +12,13 @@ export default function HomePage() {
                 <Globe className="h-8 w-8 text-primary-600" />
                 <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
             </Link>
-            <div>
-              <Link 
-              href="/pricing" className='btn-secondary'>Pricing</Link>
-            </div>
+            
 
             <div className="flex space-x-4">
               <Link href="/login" className="btn-secondary">
                 Login
               </Link>
-              <Link href="/login" className="btn-primary">
+              <Link href="/login?mode=signup" className="btn-primary">
                 Sign Up
               </Link>
             </div>
@@ -40,10 +37,10 @@ export default function HomePage() {
               Powered by the community. Get insights from real people going through the same visa journey as you.
             </p>
             <div className="flex justify-center space-x-4">
-              <Link href="/login" className="btn-primary text-lg px-8 py-4">
+              <Link href="/login?mode=signup" className="btn-primary text-lg px-8 py-4">
                 Get Started
               </Link>
-              <Link href="/login" className="btn-secondary text-lg px-8 py-4">
+              <Link href="/pricing" className="btn-secondary text-lg px-8 py-4">
                 Learn More
               </Link>
             </div>
@@ -118,7 +115,7 @@ export default function HomePage() {
             
             <div className="card">
               <p className="text-gray-600 mb-4">
-                "Finally found a reliable source for US visa timelines. The real-time updates are exactly what I needed."
+              &quot;Finally found a reliable source for US visa timelines. The real-time updates are exactly what I needed.&quot;
               </p>
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">

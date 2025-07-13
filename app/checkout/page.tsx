@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Globe, Shield, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Globe, Shield, CheckCircle, AlertTriangle, X, ArrowRight } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function CheckoutPage() {
@@ -15,6 +15,7 @@ export default function CheckoutPage() {
   const [accessCode, setAccessCode] = useState('')
   const [codeError, setCodeError] = useState('')
   const [codeLoading, setCodeLoading] = useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   const handleAccessCode = async () => {
     setCodeError('')
@@ -299,7 +300,17 @@ export default function CheckoutPage() {
               )}
             </button>
             <div className="mt-6 text-center space-y-2">
-              <p className="text-sm text-gray-500">Have an access code?</p>
+              <div className="mt-6 text-center space-y-2">
+                <p className="text-sm text-gray-500">
+                  <span 
+                    onClick={() => setShowModal(true)}
+                    className="text-primary-600 hover:text-primary-500 cursor-pointer underline"
+                  >
+                    FREE Lifetime Access
+                  </span>
+                </p>
+              </div>
+
               <div className="flex items-center space-x-2">
                 <input
                   type="text"
@@ -342,6 +353,35 @@ export default function CheckoutPage() {
             </a>
           </p>
         </div>
+
+        {/* Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white rounded-xl shadow-lg p-6 max-w-lg w-full relative">
+              <button
+                onClick={() => setShowModal(false)}
+                className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-6 w-6" />
+              </button>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Claim Your Free Premium Access</h3>
+              <ol className="list-decimal list-inside space-y-2 text-gray-700 mb-6">
+                <li className="line-through">Sign up as a User</li>
+                <li className="line-through">Confirm your Email Address</li>
+                <li>Forward email from USCIS or CEAC.gov — Validate your current status</li>
+                <li>Receive Confirmation and Free Access Code</li>
+                <li>Use Access code for Premium Access</li>
+              </ol>
+              <Link
+                href="/login?mode=signup"
+                className="inline-flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Sign Up
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
