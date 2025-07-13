@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Globe, Shield, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react'
@@ -15,42 +15,7 @@ export default function CheckoutPage() {
   const [paymentCheckAttempts, setPaymentCheckAttempts] = useState(0)
   const router = useRouter()
 
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        console.log('🔄 CheckoutPage: Starting user authentication check...')
-        
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        
-        if (authError) {
-          console.error('❌ CheckoutPage: Auth error:', authError)
-          setError('Authentication failed')
-          router.push('/login')
-          return
-        }
-        
-        if (!user) {
-          console.log('⚠️ CheckoutPage: No user found, redirecting to login')
-          router.push('/login')
-          return
-        }
-        
-        console.log('✅ CheckoutPage: User authenticated:', user.id)
-        setUser(user)
-        
-        // Start payment status polling
-        await checkPaymentStatus(user.id)
-        
-      } catch (error) {
-        console.error('❌ CheckoutPage: Unexpected error in getUser:', error)
-        setError('Unexpected error occurred')
-        setPaymentCheckStatus('error')
-      }
-    }
-    getUser()
-  }, [router])
-
-  const checkPaymentStatus = async (userId: string) => {
+  const checkPaymentStatus = useCallback(async (userId: string) => {
     console.log('🔄 CheckoutPage: Starting payment status check...')
     setPaymentCheckStatus('checking')
     setPaymentCheckAttempts(0)
@@ -110,7 +75,43 @@ export default function CheckoutPage() {
     
     // Start polling
     pollPaymentStatus()
-  }
+  }, [router])
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        console.log('🔄 CheckoutPage: Starting user authentication check...')
+        
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        
+        if (authError) {
+          console.error('❌ CheckoutPage: Auth error:', authError)
+          setError('Authentication failed')
+          router.push('/login')
+          return
+        }
+        
+        if (!user) {
+          console.log('⚠️ CheckoutPage: No user found, redirecting to login')
+          router.push('/login')
+          return
+        }
+        
+        console.log('✅ CheckoutPage: User authenticated:', user.id)
+        setUser(user)
+        
+        // Start payment status polling
+        await checkPaymentStatus(user.id)
+        
+      } catch (error) {
+        console.error('❌ CheckoutPage: Unexpected error in getUser:', error)
+        setError('Unexpected error occurred')
+        setPaymentCheckStatus('error')
+      }
+    }
+    getUser()
+  }, [router, checkPaymentStatus])
+
 
   const handleCheckout = async () => {
     setLoading(true)
