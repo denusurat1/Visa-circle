@@ -371,7 +371,7 @@ export default function CheckoutPage() {
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-600">
             Questions? Contact us at{' '}
-            <a href="mailto:support@visacircle.com" className="text-primary-600 hover:text-primary-500">
+            <a href="mailto:visacircle1@gmail.com" className="text-primary-600 hover:text-primary-500">
               support@visacircle.com
             </a>
           </p>
