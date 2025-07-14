@@ -175,7 +175,10 @@ export default function LoginPage() {
 
         // Redirect based on payment status
         if (userData?.has_paid) {
-          router.push('/dashboard')
+          console.log("userData:", userData)
+          console.log("has_paid:", userData?.has_paid)
+          console.log("Redirecting to feed page")
+          router.push('/feed')
         } else {
           console.log("Redirecting to checkout page")
           router.push('/checkout')

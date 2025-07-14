@@ -34,7 +34,7 @@ export default function SuccessPage() {
     
         let hasPaid = false
         let retryCount = 0
-        const maxRetries = 10
+        const maxRetries = 20
     
         while (!hasPaid && retryCount < maxRetries) {
           console.log(`🔄 Success Page: Checking payment status (attempt ${retryCount + 1}/${maxRetries})...`)
@@ -298,19 +298,20 @@ export default function SuccessPage() {
           )}*/}
 
           <div className="space-y-4">
-            <Link
-              href="/feed"
-              className="w-full btn-primary flex items-center justify-center space-x-2"
-              onClick={(e) => {
-                if (paymentStatus !== 'confirmed') {
-                  e.preventDefault()
-                  alert('Please wait for payment confirmation before proceeding.')
-                }
-              }}
-            >
-              <span>Go to Dashboard</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+          <Link
+            href="/feed"
+            className={`w-full btn-primary flex items-center justify-center space-x-2 ${
+              paymentStatus !== 'confirmed' ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            onClick={(e) => {
+              if (paymentStatus !== 'confirmed') {
+                e.preventDefault()
+              }
+            }}
+          >
+            <span>Go to Dashboard</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
             
             {paymentStatus === 'confirmed' && (
               <p className="text-sm text-gray-500">

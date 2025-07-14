@@ -313,7 +313,7 @@ export default function CheckoutPage() {
                     onClick={() => setShowModal(true)}
                     className="text-primary-600 hover:text-primary-500 cursor-pointer underline"
                   >
-                    FREE Lifetime Access
+                    FREE Lifetime Access Code
                   </span>
                 </p>
               </div>

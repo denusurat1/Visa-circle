@@ -49,7 +49,7 @@ export default function CheckoutPage() {
         })
 
         if (userData?.has_paid) {
-          console.log('✅ CheckoutPage: Payment confirmed, redirecting to dashboard')
+          console.log('✅ CheckoutPage: Payment confirmed, redirecting to feed')
           setPaymentCheckStatus('confirmed')
           setTimeout(() => {
             router.push('/feed')
