@@ -44,7 +44,7 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getSession()
 
   // Only protect dashboard and checkout routes
-  const isProtectedRoute = req.nextUrl.pathname.startsWith('/dashboard') || 
+  const isProtectedRoute = req.nextUrl.pathname.startsWith('/feed') || 
                           req.nextUrl.pathname.startsWith('/checkout')
 
   if (isProtectedRoute && !session) {
@@ -53,7 +53,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Special handling for dashboard access - check payment status
-  if (req.nextUrl.pathname.startsWith('/dashboard') && session) {
+  if (req.nextUrl.pathname.startsWith('') && session) {
     const { data: userData } = await supabase
       .from('users')
       .select('has_paid')

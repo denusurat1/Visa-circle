@@ -175,7 +175,7 @@ export default function SuccessPage() {
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
-            router.push('/dashboard')
+            router.push('/feed')
             return 0
           }
           return prev - 1
@@ -299,7 +299,7 @@ export default function SuccessPage() {
 
           <div className="space-y-4">
             <Link
-              href="/dashboard"
+              href="/feed"
               className="w-full btn-primary flex items-center justify-center space-x-2"
               onClick={(e) => {
                 if (paymentStatus !== 'confirmed') {

@@ -177,7 +177,7 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 - **`/`** - Homepage with hero section and testimonials
 - **`/login`** - Authentication page (login/signup)
 - **`/checkout`** - Payment page for $1 access
-- **`/dashboard`** - Main application with milestone tracking
+- **`feed`** - Main application with milestone tracking
 
 ## 🔐 Authentication Flow
 

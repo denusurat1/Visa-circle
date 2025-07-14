@@ -282,7 +282,7 @@ CREATE POLICY "Authenticated users can insert feedback" ON feedback_posts
 ### Middleware Protection
 ```typescript
 // middleware.ts - Route protection logic
-const isProtectedRoute = req.nextUrl.pathname.startsWith('/dashboard') || 
+const isProtectedRoute = req.nextUrl.pathname.startsWith('/feed') || 
                         req.nextUrl.pathname.startsWith('/checkout')
 
 if (isProtectedRoute && !session) {
@@ -290,7 +290,7 @@ if (isProtectedRoute && !session) {
 }
 
 // Check payment status for dashboard access
-if (req.nextUrl.pathname.startsWith('/dashboard') && session) {
+if (req.nextUrl.pathname.startsWith('/feed') && session) {
   const { data: userData } = await supabase
     .from('users')
     .select('has_paid')
@@ -379,8 +379,8 @@ export async function POST(req: Request) {
 - **`/success`**: Payment success confirmation
 
 ### Protected Routes
-- **`/dashboard`**: Main bulletin board with visa updates
-- **`/dashboard/new`**: Add new visa milestone
+- **`/feed`**: Main bulletin board with visa updates
+- **`/feed/new`**: Add new visa milestone
 - **`/feedback`**: Feedback feed with reactions
 - **`/profile`**: User profile management
 

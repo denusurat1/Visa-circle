@@ -20,7 +20,7 @@ export default function CheckoutPage() {
   const [showModal, setShowModal] = useState(false)
   const params = useSearchParams()
   const reason = params?.get('reason')
-  const [showVerifyDetails, setShowVerifyDetails] = useState(false);
+  const [showVerifyDetails, setShowVerifyDetails] = useState(true);
 
   
   const handleAccessCode = async () => {
@@ -49,7 +49,7 @@ export default function CheckoutPage() {
         return
       }
   
-      router.push('/dashboard')
+      router.push('/feed')
     } catch (err) {
       console.error(err)
       setCodeError('Unexpected error. Please try again.')
@@ -99,7 +99,7 @@ export default function CheckoutPage() {
 
         if (userData?.has_paid) {
           console.log('✅ CheckoutPage: User already paid, redirecting to dashboard')
-          router.push('/dashboard')
+          router.push('/feed')
           return
         }
 
@@ -392,9 +392,9 @@ export default function CheckoutPage() {
                   onClick={() => setShowVerifyDetails(!showVerifyDetails)}
                   className="flex justify-center w-1/3 cursor-pointer"
                 >
-                  <div className="flex flex-col items-center px-3 py-2 rounded-md hover:bg-gray-100 hover:text-primary-600 transition-colors">
+                  <div className="flex flex-col items-center px-3 py-2 rounded-md hover:bg-gray-100 hover:text-primary-600 transition-colors text-gray-800">
                   <Shield className="h-8 w-8 text-green-600 mb-2" />
-                  <span className="text-sm font-medium text-center">
+                  <span className="text-lg font-medium font-semibold text-center">
                     Verify
                   </span>
                   </div>

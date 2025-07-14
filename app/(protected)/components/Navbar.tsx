@@ -31,7 +31,7 @@ export default function Navbar({
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-          <Link href="/dashboard" className="flex items-center space-x-2">
+          <Link href="/feed" className="flex items-center space-x-2">
             <Globe className="h-8 w-8 text-primary-600" />
             <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
           </Link>
@@ -39,7 +39,7 @@ export default function Navbar({
           <div className="flex items-center space-x-4">
             {showNewUpdate && (
               <Link 
-                href="/dashboard/new" 
+                href="/feed/new" 
                 className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
               >
                 <Plus className="h-4 w-4" />
@@ -49,7 +49,7 @@ export default function Navbar({
             
             {showDashboard && (
               <Link
-                href="/dashboard"
+                href="/feed"
                 className="flex items-center space-x-2 text-gray-600 hover:text-primary-600"
               >
                 <Newspaper className="h-4 w-4" />

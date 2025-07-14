@@ -190,9 +190,9 @@ const { error } = await supabase.auth.updateUser({
 
 ### Navbar Integration
 Profile link has been added to all protected pages:
-- Dashboard (`/dashboard`)
+- Dashboard (`/feed`)
 - Feedback (`/feedback`) 
-- New Update (`/dashboard/new`)
+- New Update (`/feed/new`)
 - Profile (`/profile`)
 
 ### Navigation Structure
@@ -301,9 +301,9 @@ Navbar
 - `profile-setup.sql` - Database schema and RLS policies
 
 ### Updated Files
-- `app/(protected)/dashboard/page.tsx` - Uses shared Navbar
+- `app/(protected)/feed/page.tsx` - Uses shared Navbar
 - `app/(protected)/feedback/page.tsx` - Uses shared Navbar
-- `app/(protected)/dashboard/new/page.tsx` - Uses shared Navbar + profile integration
+- `app/(protected)/feed/new/page.tsx` - Uses shared Navbar + profile integration
 - `app/(protected)/profile/page.tsx` - Uses shared Navbar + enhanced functionality
 
 ## Security Considerations

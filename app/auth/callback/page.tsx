@@ -52,7 +52,7 @@ export default function CheckoutPage() {
           console.log('✅ CheckoutPage: Payment confirmed, redirecting to dashboard')
           setPaymentCheckStatus('confirmed')
           setTimeout(() => {
-            router.push('/dashboard')
+            router.push('/feed')
           }, 1000)
           return
         }

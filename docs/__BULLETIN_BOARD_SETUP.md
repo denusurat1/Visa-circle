@@ -24,8 +24,8 @@ After running the script, verify that the following tables exist in your Supabas
 
 ## New Features Implemented
 
-### 1. Bulletin Board (`/dashboard`)
-- **Location**: `app/(protected)/dashboard/page.tsx`
+### 1. Bulletin Board (`/feed`)
+- **Location**: `app/(protected)/feed/page.tsx`
 - **Access**: Only authenticated users with `has_paid = true`
 - **Features**:
   - Display visa updates in chronological order
@@ -33,8 +33,8 @@ After running the script, verify that the following tables exist in your Supabas
   - Like/dislike reactions on each update
   - Responsive design with Tailwind CSS
 
-### 2. New Update Form (`/dashboard/new`)
-- **Location**: `app/(protected)/dashboard/new/page.tsx`
+### 2. New Update Form (`/feed/new`)
+- **Location**: `app/(protected)/feed/new/page.tsx`
 - **Access**: Only authenticated users with `has_paid = true`
 - **Features**:
   - Form to submit new visa milestones
@@ -50,7 +50,7 @@ After running the script, verify that the following tables exist in your Supabas
   - Consistent access control across protected pages
 
 ### 4. Reusable Components
-- **Location**: `app/(protected)/dashboard/components/VisaUpdateCard.tsx`
+- **Location**: `app/(protected)/feed/components/VisaUpdateCard.tsx`
 - **Features**:
   - Modular card component for visa updates
   - Built-in reaction functionality

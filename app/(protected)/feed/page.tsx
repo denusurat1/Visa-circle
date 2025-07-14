@@ -269,7 +269,7 @@ export default function BoardPage() {
                   type="text"
                   value={selectedMilestone}
                   onChange={(e) => setSelectedMilestone(e.target.value)}
-                  placeholder="Search milestones..."
+                  placeholder="e.g.'Priority Date','USCIS Approved'"
                   className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2"
                 />
               </div>
@@ -297,7 +297,7 @@ export default function BoardPage() {
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">No visa updates found.</p>
               <Link
-                href="/dashboard/new"
+                href="/new"
                 className="inline-block mt-4 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
               >
                 Share Your First Update

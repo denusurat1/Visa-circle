@@ -31,7 +31,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-20">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Track visa progress in real-time
+              Track US i-130 visa progress in real-time
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Powered by the community. Get insights from real people going through the same visa journey as you.

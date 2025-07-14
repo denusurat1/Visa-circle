@@ -37,7 +37,6 @@ export default function VisaUpdateCard({
         {/* Highlighted Milestone & Date */}
         <div className="mb-4">
           <p className="text-lg font-bold text-primary-700">
-            <span className="text-gray-600 font-semibold">Reach</span>{' '}
             {update.milestone}{' '}
             <span className="text-gray-600 font-semibold">on</span>{' '}
             <span className="text-gray-600 font-semibold">

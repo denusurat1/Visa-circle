@@ -22,15 +22,11 @@ const COUNTRIES = [
 ]
 
 const VISA_TYPES = [
-  'CR1 / IR1',
+  'IR1',
+  'CR1',
+  'IR2',
+  'F2A',
   'K1',
-  'B1-B2',
-  'F1',
-  'H1B',
-  'L1',
-  'O1',
-  'E1/E2',
-  'TN',
   'Other'
 ]
 
@@ -44,7 +40,7 @@ const MILESTONES = [
   'USCIS RFE (Optional)',
   'USCIS Approval',
   'NVC Received',
-  'NVC RFE',
+  'NVC RFE (Optional)',
   'Documentarily Qualified',
   'Interview Scheduled',
   'Visa Issued'
@@ -104,6 +100,9 @@ export default function NewUpdatePage() {
         if (data.visa_type) {
           setSelectedVisaType(data.visa_type)
         }
+        if (data.service_center) {
+          setSelectedCenter(data.service_center)
+        }
       }
     } catch (error) {
       console.error('Error in fetchUserProfile:', error)
@@ -139,7 +138,7 @@ export default function NewUpdatePage() {
       }
 
       // Redirect to dashboard
-      router.push('/dashboard')
+      router.push('')
     } catch (error) {
       console.error('Error creating update:', error)
       alert('Error creating update. Please try again.')
@@ -156,7 +155,7 @@ export default function NewUpdatePage() {
         {/* Header */}
         <div className="flex items-center space-x-4 mb-8">
           <Link
-            href="/dashboard"
+            href="/feed"
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -226,21 +225,29 @@ export default function NewUpdatePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Service Center *
-              </label>
-              <select
-                value={selectedCenter}
-                onChange={(e) => setSelectedCenter(e.target.value)}
-                required
-                className="w-full border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value="">Select service center</option>
-                {SERVICE_CENTERS.map((center) => (
-                  <option key={center} value={center}>{center}</option>
-                ))}
-              </select>
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Service Center *
+            </label>
+            <select
+              value={selectedCenter}
+              onChange={(e) => setSelectedCenter(e.target.value)}
+              required
+              disabled={!!userProfile?.service_center}
+              className={`w-full border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                userProfile?.center ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''
+              }`}
+            >
+              {!selectedCenter && <option value="">Select service center</option>}
+              {SERVICE_CENTERS.map((center) => (
+                <option key={center} value={center}>{center}</option>
+              ))}
+            </select>
+            {userProfile?.center && (
+              <p className="text-sm text-gray-500 mt-1">
+                Pre-filled from your profile. Update your profile to change this.
+              </p>
+            )}
+          </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -290,8 +297,7 @@ export default function NewUpdatePage() {
               disabled={loading}
               className="w-full bg-primary-600 text-white py-3 px-4 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
-              <Check className="h-4 w-4" />
-              <span>{loading ? 'Creating Update...' : 'Create Update'}</span>
+              <span>{loading ? 'Creating Update...' : 'Post'}</span>
             </button>
           </form>
         </div>
