@@ -16,6 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body className={inter.className}>
         <div className="min-h-screen bg-gray-50">
           {children}
@@ -23,4 +26,4 @@ export default function RootLayout({
       </body>
     </html>
   )
-} 
+}

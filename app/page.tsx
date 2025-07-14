@@ -40,7 +40,7 @@ export default function HomePage() {
               <Link href="/pricing" className="btn-primary text-lg px-8 py-4">
                 Get Started
               </Link>
-              <Link href="/pricing" className="btn-secondary text-lg px-8 py-4">
+              <Link href="/visa-details" className="btn-secondary text-lg px-8 py-4">
                 Learn More
               </Link>
             </div>

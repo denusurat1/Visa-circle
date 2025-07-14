@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Globe, LogOut, User as UserIcon, Plus, Phone, Newspaper } from 'lucide-react'
+import { Globe, LogOut, User as UserIcon, Plus, Phone, Newspaper, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 
@@ -31,10 +31,10 @@ export default function Navbar({
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-            <Link href="/dashboard" className="flex items-center space-x-2">
-                <Globe className="h-8 w-8 text-primary-600" />
-                <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
-            </Link>
+          <Link href="/dashboard" className="flex items-center space-x-2">
+            <Globe className="h-8 w-8 text-primary-600" />
+            <span className="text-2xl font-bold text-gray-900">Visa Circle</span>
+          </Link>
 
           <div className="flex items-center space-x-4">
             {showNewUpdate && (
@@ -57,7 +57,6 @@ export default function Navbar({
               </Link>
             )}
             
-
             {/* Profile Dropdown */}
             <div className="relative">
               <button
@@ -89,9 +88,18 @@ export default function Navbar({
                       onClick={() => setShowDropdown(false)}
                     >
                       <Phone className="h-4 w-4" />
-                      <span>Contact Us</span>
+                      <span>Feedback</span>
                     </Link>
                   )}
+
+                  <Link
+                    href="/visa-details"
+                    className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary-600"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span>Visa Details</span>
+                  </Link>
                   
                   <div className="border-t border-gray-200 my-1"></div>
                   
@@ -121,4 +129,4 @@ export default function Navbar({
       )}
     </nav>
   )
-} 
+}

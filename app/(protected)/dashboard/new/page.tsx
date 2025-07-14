@@ -40,16 +40,14 @@ const SERVICE_CENTERS = [
 ]
 
 const MILESTONES = [
-  'Applied',
-  'Biometrics',
+  'Priority Date',
+  'USCIS RFE (Optional)',
+  'USCIS Approval',
+  'NVC Received',
+  'NVC RFE',
+  'Documentarily Qualified',
   'Interview Scheduled',
-  'Approved',
-  'Rejected',
-  'Additional Documents Requested',
-  'Case Transferred',
-  'RFE Received',
-  'RFE Responded',
-  'Case Closed'
+  'Visa Issued'
 ]
 
 export default function NewUpdatePage() {

@@ -187,7 +187,7 @@ export default function PricingPage() {
                 {/* Step 2 */}
                 <div className="flex flex-col items-center w-1/3">
                   <Shield className="h-8 w-8 text-green-600 mb-2" />
-                  <span className="text-sm font-medium text-gray-800 text-center">Forward Email</span>
+                  <span className="text-sm font-medium text-gray-800 text-center">Verify</span>
                 </div>
 
                 <ArrowRight className="h-4 w-4 text-gray-300" />
@@ -210,7 +210,7 @@ export default function PricingPage() {
               <p className="text-center text-sm text-gray-500">
                 If you have any questions, email us at{' '}
                 <a
-                  href="mailto:support@visacircle.com"
+                  href="mailto:visacircle1@gmail.com"
                   className="text-primary-600 hover:text-primary-500"
                 >
                   support@visacircle.com

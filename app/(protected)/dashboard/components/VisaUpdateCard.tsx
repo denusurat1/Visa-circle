@@ -34,29 +34,40 @@ export default function VisaUpdateCard({
             </p>
           </div>
         </div>
-        <span className="inline-block bg-primary-600 text-white text-xs px-3 py-1 rounded-full font-medium">
-          {update.visa_type}
-        </span>
-      </div>
-
-      {/* Milestone */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="inline-block bg-gray-200 text-black text-sm px-3 py-1 rounded-full font-medium">
-          {update.milestone}
+        {/* Highlighted Milestone & Date */}
+        <div className="mb-4">
+          <p className="text-lg font-bold text-primary-700">
+            <span className="text-gray-600 font-semibold">Reach</span>{' '}
+            {update.milestone}{' '}
+            <span className="text-gray-600 font-semibold">on</span>{' '}
+            <span className="text-gray-600 font-semibold">
+              {update.date_of_event
+                ? new Date(update.date_of_event).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })
+                : 'N/A'}
+            </span>
+          </p>
+        </div>
+      <span>Visa Type:{' '}
+          <span className="inline-block bg-primary-600 text-white text-xs px-3 py-1 rounded-full font-medium">
+            {update.visa_type}
+          </span>
         </span>
       </div>
 
       {/* A → B Path */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-sm text-gray-600 mb-3">
         <div className="flex-1">
-          <div className="font-medium text-black">🅐 Service Center</div>
-          <div>{update.center || 'N/A'}</div>
-          <div>{update.date_of_event ? new Date(update.date_of_event).toLocaleDateString() : ''}</div>
+          <div className="font-bold text-lg text-black">United States: {update.center || 'N/A'}</div>
+          <div>Visa Country: Service Center</div>
         </div>
         <div className="hidden sm:block w-px bg-gray-300 h-10"></div>
         <div className="flex-1 mt-2 sm:mt-0">
-          <div className="font-medium text-black">🅑 Country</div>
-          <div>{update.country || 'N/A'}</div>
+          <div className="font-bold text-lg text-black">{update.country || 'N/A'}</div>
+          <div>Applicant&apos;s Country</div>
         </div>
       </div>
 

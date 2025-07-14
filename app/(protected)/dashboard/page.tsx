@@ -24,8 +24,12 @@ const COUNTRIES = [
 ]
 
 const VISA_TYPES = [
-  'B1-B2',
-  'CR1 / IR1'
+  'IR1',
+  'CR1',
+  'IR2',
+  'F2A',
+  'K1',
+  'Other'
 ]
 
 export default function BoardPage() {
@@ -270,7 +274,7 @@ export default function BoardPage() {
                 />
               </div>
             </div>
-            <div className="flex space-x-3">
+            {/* Apply and Clear Buttons <div className="flex space-x-3">
               <button
                 onClick={applyFilters}
                 className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
@@ -283,7 +287,7 @@ export default function BoardPage() {
               >
                 Clear Filters
               </button>
-            </div>
+            </div> */}
           </div>
         )}
 

@@ -10,15 +10,11 @@ import type { User } from '@supabase/supabase-js'
 import Navbar from '@/app/(protected)/components/Navbar'
 
 const VISA_TYPES = [
-  'CR1 / IR1',
+  'IR1',
+  'CR1',
+  'IR2',
+  'F2A',
   'K1',
-  'B1-B2',
-  'F1',
-  'H1B',
-  'L1',
-  'O1',
-  'E1/E2',
-  'TN',
   'Other'
 ]
 
