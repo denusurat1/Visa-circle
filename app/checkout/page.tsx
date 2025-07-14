@@ -418,6 +418,7 @@ export default function CheckoutPage() {
                     <Link
                     href="/profile" className="text-rpimary-600 hover:text-primary-500 underline">Profile</Link></p>
                   <p><strong>Step 2:</strong> Forward USCIS Email (Current Application) to Support</p>
+                  <p><strong>Step 3:</strong> Receive Access Code via Email</p>
                 </div>
                         )}
 
